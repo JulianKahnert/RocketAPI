@@ -61,12 +61,16 @@ class R60V:
         """
         Documentation would be nice...
         """
-        # from first connection attempt
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((self.machine_ip, self.machine_port))
-        s.listen(1)
+        message = self.cs_attach('r00000001')
 
-        conn, addr = s.accept()
+        # from first connection attempt
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind((self.machine_ip, self.machine_port))
+        
+        # DOUBLE CHECK THE REST:
+        sock.write(message)
+
+        conn, addr = sock.accept()
         print('Connection address:', addr)
         while 1:
             data = conn.recv(BUFFER_SIZE)
@@ -80,6 +84,12 @@ class R60V:
         Documentation would be nice...
         """
         print('close tcp connection')
+
+    def update(self):
+        """
+        Documentation would be nice...
+        """
+        print('update properties')
 
     def checksum(self, raw):
         """
@@ -97,9 +107,13 @@ class R60V:
             value_hex = '0' + value_hex
         return value_hex
 
-    def update(self):
-        """
-        Documentation would be nice...
-        """
-        print('update properties')
+    def cs_attach(self, message):
+        message += self.checksum(message)
 
+    def cs_verify(self, raw):
+        # checksum max length 2 digits!?
+        message_actual = raw[:-2]
+        cs_actual = raw[-2:]
+        cs_expected = self.checksum(message_actual)
+
+        return cs_actual == cs_expected
