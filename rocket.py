@@ -81,11 +81,21 @@ class R60V:
         """
         print('close tcp connection')
 
-    def checksumming(self):
+    def checksum(self, raw):
         """
-        Documentation would be nice...
+        CHECKSUM
+        
+        calculate function from:
+        nodejs/src/protocol/Checksum.ts
+        nodejs/src/protocol/Checksum.unit.ts
         """
-        print('checksum data')
+        value = 0
+        for sz in raw:
+            value += ord(sz)
+        value_hex = hex(value & 255)[2:].upper()
+        if len(value_hex) < 2:
+            value_hex = '0' + value_hex
+        return value_hex
 
     def update(self):
         """
