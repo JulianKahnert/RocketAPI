@@ -35,25 +35,21 @@ class R60V:
     def open(self):
         """
         Documentation would be nice...
+        
         """
-        message = self.cs_attach('r00000001')
+        #message = self.cs_attach('r00000001')
 
-        # from first connection attempt
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind((self.machine_ip, self.machine_port))
+        # from: https://wiki.python.org/moin/TcpCommunication
+        BUFFER_SIZE = 1024
+        # might be added (!?): BUFFER_WAIT = 200; //ms
+        MESSAGE = b'Hello, World!'
 
-        # DOUBLE CHECK THE REST:
-        sock.write(message)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((self.machine_ip, self.machine_port))
+        s.send(MESSAGE)
+        data = s.recv(BUFFER_SIZE)
+        s.close()
 
-        conn, addr = sock.accept()
-        print('Connection address:', addr)
-        while 1:
-            data = conn.recv(BUFFER_SIZE)
-            if not data:
-                break
-            print("received data:", data)
-            conn.send(data)  # echo
-        conn.close()
 
     def close(self):
         """
