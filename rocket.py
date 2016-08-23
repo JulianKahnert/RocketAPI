@@ -15,27 +15,10 @@ class R60V:
 
         self.state = []
 
-    def send(self):
-        """
-        Documentation would be nice...
-        """
-        print('send data')
 
-    def recieve(self):
+    def read(self):
         """
-        Documentation would be nice...
-        """
-        print('get data')
-
-    def parse(self):
-        """
-        Documentation would be nice...
-        """
-        print('python => bytes')
-
-    def open(self):
-        """
-        Documentation would be nice...
+        read data from machine...
 
         """
         # from: https://wiki.python.org/moin/TcpCommunication
@@ -54,17 +37,12 @@ class R60V:
         s.close()
         self._parse_state(data)
 
-    def close(self):
+    def write(self):
         """
-        Documentation would be nice...
+        write data on machine...
         """
-        print('close tcp connection')
+        print('write data on machine')
 
-    def update(self):
-        """
-        Documentation would be nice...
-        """
-        print('update properties')
 
     # ### HELPER FUNCTIONS ###
 
