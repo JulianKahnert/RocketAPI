@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import copy
+import warnings
 
 
 # parse DayOfWeek, Language, TemperatureUnit, WaterSource
@@ -94,25 +95,43 @@ class machine_state:
         # coffeeCyclesTotal
 
         # pressureA, pressureB, pressureC
-        for profile in [self.pressureA, self.pressureB, self.pressureC]:
-            self._check_profile(profile)
+        bValid, err = self._check_profile(self.pressureA)
+        if bValid:
+            warnings.warn(err + '\n Change to default.')
+            self.pressureA = Default_pressure_profile_A
+
+        bValid, err = self._check_profile(self.pressureB)
+        if bValid:
+            warnings.warn(err + '\n Change to default.')
+            self.pressureB = Default_pressure_profile_B
+
+        bValid, err = self._check_profile(self.pressureC)
+        if bValid:
+            warnings.warn(err + '\n Change to default.')
+            self.pressureC = Default_pressure_profile_C
 
         # activeProfile
 
         # language
         if self.language not in Language:
-            raise ValueError('Selected lanuage not available!')
+            warnings.warn(
+                'Selected lanuage not available!\n Change to default.')
+            self.language = 'German'
 
         # isServiceBoilerOn
         # isMachineInStandby
 
         # waterSource
         if self.waterSource not in WaterSource:
-            raise ValueError('Selected water source not available!')
+            warnings.warn(
+                'Selected water source not available!\n Change to default.')
+            self.waterSource = 'Tank'
 
         # temperatureUnit
         if self.temperatureUnit not in TemperatureUnit:
-            raise ValueError('Selected temperature unit not available!')
+            warnings.warn(
+                'Selected temperature unit not available!\n Change to default.')
+            self.temperatureUnit = 'Celsius'
 
         # coffeeTemperature
         if self.temperatureUnit == 'Celsius':
@@ -122,7 +141,10 @@ class machine_state:
             bValid, err = self._check_range(self.coffeeTemperature,
                                             Coffee_temp_F)
         if not bValid:
-            raise ValueError('Coffee temperature' + err)
+            warnings.warn('Coffee boiler temperature ' +
+                          err + '\n Change to default.')
+            self.temperatureUnit = 'Celsius'
+            self.coffeeTemperature = 105
 
         # steamTemperature
         if self.temperatureUnit == 'Celsius':
@@ -132,7 +154,10 @@ class machine_state:
             bValid, err = self._check_range(self.steamTemperature,
                                             Steam_temp_F)
         if not bValid:
-            raise ValueError('Coffee temperature' + err)
+            warnings.warn('Steam boiler temperature ' +
+                          err + '\n Change to default.')
+            self.temperatureUnit = 'Celsius'
+            self.steamTemperature = 123
 
         # steamCleanTime
         # coffeePID
@@ -167,9 +192,9 @@ class machine_state:
                 break
 
             # check pressure
-            bValid, err = self._check_range(profile[num][1], Time)
+            bValid, err = self._check_range(profile[num][1], Pressure)
             if not bValid:
-                err = 'Time values ' + err
+                err = 'Pressure values ' + err
                 break
 
         return bValid, err
