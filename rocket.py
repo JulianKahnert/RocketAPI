@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
-import numpy as np
-import copy
 import socket
+from rocket_state import machine_state
 
 
 class R60V:
@@ -13,6 +12,8 @@ class R60V:
         # connection to Rocket
         self.machine_ip = machine_ip
         self.machine_port = machine_port
+
+        self.state = []
 
     def send(self):
         """
@@ -35,9 +36,9 @@ class R60V:
     def open(self):
         """
         Documentation would be nice...
-        
+
         """
-        #message = self.cs_attach('r00000001')
+        #message = self._cs_attach('r00000001')
 
         # from: https://wiki.python.org/moin/TcpCommunication
         BUFFER_SIZE = 1024
@@ -49,7 +50,7 @@ class R60V:
         s.send(MESSAGE)
         data = s.recv(BUFFER_SIZE)
         s.close()
-
+        self._parse_state(data)
 
     def close(self):
         """
@@ -63,7 +64,57 @@ class R60V:
         """
         print('update properties')
 
-    def checksum(self, raw):
+    # ### HELPER FUNCTIONS ###
+
+    def _parse_state(self, data):
+        """
+        CURRENTLY NOT WORKING!!!
+        Fix methods (from src/protocol/MemorySlice.ts):
+        * getByte
+        * getBoolean
+        * getShort
+        * getInt
+        """
+        state = machine_state()
+        state.temperatureUnit = data.getByte(0)
+        state.language = data.getByte(1)
+        state.coffeeTemperature = data.getByte(2)
+        state.steamTemperature = data.getByte(3)
+        state.coffeePID = self._parse_PID(data, 4)          # 4-5, 10-11, 16-17
+        state.coffeePID = self._parse_PID(data, 6)          # 6-7, 12-13, 18-19
+        state.coffeePID = self._parse_PID(data, 8)          # 8-9, 14-15, 20-21
+        state.pressureA = self._parse_profile(data, 22)     # 22-36
+        state.pressureB = self._parse_profile(data, 38)     # 38-52
+        state.pressureC = self._parse_profile(data, 54)     # 54-68
+        state.waterSource = data.getByte(70)
+        state.activeProfile = data.getByte(71)
+        state.steamCleanTime = data.getByte(72)
+        state.isServiceBoilerOn = data.getBoolean(73)
+        state.isMachineInStandby = data.getBoolean(74)
+        state.coffeeCyclesSubtotal = data.getShort(75)      # 75-76
+        state.coffeeCyclesTotal = data.getInt(77)           # 77-80
+        state.autoOnTime = [data.getByte(81), data.getByte(82)]
+        state.autoStandbyTime = [data.getByte(83), data.getByte(84)]
+        state.autoSkipDay = data.getByte(85)
+        self.state = state
+
+    def _parse_PID(self, data, offset):
+        PID = []
+        PID.append(data.getByte(offset + 0))
+        PID.append(data.getByte(offset + 6))
+        PID.append(data.getByte(offset + 12))
+        return PID
+
+    def _parse_profile(self, data, offset):
+        profile = []
+        profile.append([data.getShort(offset + 0), data.getByte(offset + 10)])
+        profile.append([data.getShort(offset + 2), data.getByte(offset + 11)])
+        profile.append([data.getShort(offset + 4), data.getByte(offset + 12)])
+        profile.append([data.getShort(offset + 6), data.getByte(offset + 13)])
+        profile.append([data.getShort(offset + 8), data.getByte(offset + 14)])
+        return profile
+
+    def _checksum(self, raw):
         """
         CHECKSUM
 
@@ -79,13 +130,13 @@ class R60V:
             value_hex = '0' + value_hex
         return value_hex
 
-    def cs_attach(self, message):
-        message += self.checksum(message)
+    def _cs_attach(self, message):
+        message += self._checksum(message)
 
-    def cs_verify(self, raw):
+    def _cs_verify(self, raw):
         # checksum max length 2 digits!?
         message_actual = raw[:-2]
         cs_actual = raw[-2:]
-        cs_expected = self.checksum(message_actual)
+        cs_expected = self._checksum(message_actual)
 
         return cs_actual == cs_expected
