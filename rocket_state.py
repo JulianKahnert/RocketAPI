@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import copy
-import warnings
 
 
 # parse DayOfWeek, Language, TemperatureUnit, WaterSource
@@ -63,9 +62,9 @@ class machine_state:
         self.coffeeCyclesTotal = []
 
         # set default values
-        self.pressureA = Default_pressure_profile_A
-        self.pressureB = Default_pressure_profile_B
-        self.pressureC = Default_pressure_profile_C
+        self.pressureA = copy.deepcopy(Default_pressure_profile_A)
+        self.pressureB = copy.deepcopy(Default_pressure_profile_B)
+        self.pressureC = copy.deepcopy(Default_pressure_profile_C)
         self.activeProfile = 0
 
         self.language = 'German'
@@ -96,26 +95,28 @@ class machine_state:
 
         # pressureA, pressureB, pressureC
         bValid, err = self._check_profile(self.pressureA)
-        if bValid:
-            warnings.warn(err + '\n Change to default.')
-            self.pressureA = Default_pressure_profile_A
+        if not bValid:
+            print(self.pressureA)
+            print(err + ' Change to default.')
+            self.pressureA = copy.deepcopy(Default_pressure_profile_A)
 
         bValid, err = self._check_profile(self.pressureB)
-        if bValid:
-            warnings.warn(err + '\n Change to default.')
-            self.pressureB = Default_pressure_profile_B
+        if not bValid:
+            print(self.pressureB)
+            print(err + ' Change to default.')
+            self.pressureB = copy.deepcopy(Default_pressure_profile_B)
 
         bValid, err = self._check_profile(self.pressureC)
-        if bValid:
-            warnings.warn(err + '\n Change to default.')
-            self.pressureC = Default_pressure_profile_C
+        if not bValid:
+            print(self.pressureC)
+            print(err + ' Change to default.')
+            self.pressureC = copy.deepcopy(Default_pressure_profile_C)
 
         # activeProfile
 
         # language
         if self.language not in Language:
-            warnings.warn(
-                'Selected lanuage not available!\n Change to default.')
+            print('Selected lanuage not available! Change to default.')
             self.language = 'German'
 
         # isServiceBoilerOn
@@ -123,14 +124,12 @@ class machine_state:
 
         # waterSource
         if self.waterSource not in WaterSource:
-            warnings.warn(
-                'Selected water source not available!\n Change to default.')
+            print('Selected water source not available! Change to default.')
             self.waterSource = 'Tank'
 
         # temperatureUnit
         if self.temperatureUnit not in TemperatureUnit:
-            warnings.warn(
-                'Selected temperature unit not available!\n Change to default.')
+            print('Selected temperature unit not available! Change to default.')
             self.temperatureUnit = 'Celsius'
 
         # coffeeTemperature
@@ -141,8 +140,7 @@ class machine_state:
             bValid, err = self._check_range(self.coffeeTemperature,
                                             Coffee_temp_F)
         if not bValid:
-            warnings.warn('Coffee boiler temperature ' +
-                          err + '\n Change to default.')
+            print('Coffee boiler temperature ' + err + ' Change to default.')
             self.temperatureUnit = 'Celsius'
             self.coffeeTemperature = 105
 
@@ -154,8 +152,7 @@ class machine_state:
             bValid, err = self._check_range(self.steamTemperature,
                                             Steam_temp_F)
         if not bValid:
-            warnings.warn('Steam boiler temperature ' +
-                          err + '\n Change to default.')
+            print('Steam boiler temperature ' + err + ' Change to default.')
             self.temperatureUnit = 'Celsius'
             self.steamTemperature = 123
 
@@ -172,8 +169,8 @@ class machine_state:
     def _check_range(self, temp, min_max):
         if temp < min_max['min'] or temp > min_max['max']:
             bValid = False
-            err = 'value is out of range [{} ... {}]!'.format(
-                min_max['min'], min_max['max'])
+            err = 'value "{}" is out of range [{} ... {}]!'.format(
+                temp, min_max['min'], min_max['max'])
         else:
             bValid = True
             err = ''
@@ -188,13 +185,13 @@ class machine_state:
             # check temperature
             bValid, err = self._check_range(profile[num][0], Time)
             if not bValid:
-                err = 'Time values ' + err
+                err = 'Time ' + err
                 break
 
             # check pressure
             bValid, err = self._check_range(profile[num][1], Pressure)
             if not bValid:
-                err = 'Pressure values ' + err
+                err = 'Pressure ' + err
                 break
 
         return bValid, err

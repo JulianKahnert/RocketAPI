@@ -38,12 +38,14 @@ class R60V:
         Documentation would be nice...
 
         """
-        #message = self._cs_attach('r00000001')
-
         # from: https://wiki.python.org/moin/TcpCommunication
         BUFFER_SIZE = 1024
         # might be added (!?): BUFFER_WAIT = 200; //ms
         MESSAGE = b'Hello, World!'
+        #MESSAGE = self._cs_attach('r00000001')
+
+        # <https://github.com/jffry/rocket-r60v/blob/a9c657b7697bc92c3cdc9511f0aaf8b55b148e0d/src/protocol/messages/MachineState.ts#L260>
+        #MESSAGE = self._cs_attach('r00000073')
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.machine_ip, self.machine_port))
