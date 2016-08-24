@@ -9,6 +9,7 @@ DayOfWeek = ['Unknown', 'Monday', 'Tuesday', 'Wednesday',
              'Thursday', 'Friday', 'Saturday', 'Sunday']
 TemperatureUnit = ['Celsius', 'Fahrenheit']
 WaterSource = ['PlumbedIn', 'Tank']
+ActiveProfile = ['A', 'B', 'C']
 
 # (kind of) proteced MIN/MAX values
 Pressure = [0, 14]     # bars
@@ -45,18 +46,12 @@ Default_pressureC = [
 
 class machine_state:
     """
-    currently possible states:
-    * language
-    * temperatureUnit
-    * waterSource
-    * pressureA
-    * pressureB
-    * pressureC
+    Documentation would be nice ...
     """
 
     @property
     def coffeeCyclesSubtotal(self):
-        return self._coffeeCyclesSubtotal
+        return copy.deepcopy(self._coffeeCyclesSubtotal)
 
     @coffeeCyclesSubtotal.setter
     def coffeeCyclesSubtotal(self, x):
@@ -65,7 +60,7 @@ class machine_state:
 
     @property
     def coffeeCyclesTotal(self):
-        return self._coffeeCyclesTotal
+        return copy.deepcopy(self._coffeeCyclesTotal)
 
     @coffeeCyclesTotal.setter
     def coffeeCyclesTotal(self, x):
@@ -73,7 +68,7 @@ class machine_state:
 
     @property
     def pressureA(self):
-        return self._pressureA
+        return copy.deepcopy(self._pressureA)
 
     @pressureA.setter
     def pressureA(self, profile):
@@ -85,7 +80,7 @@ class machine_state:
 
     @property
     def pressureB(self):
-        return self._pressureB
+        return copy.deepcopy(self._pressureB)
 
     @pressureB.setter
     def pressureB(self, profile):
@@ -97,7 +92,7 @@ class machine_state:
 
     @property
     def pressureC(self):
-        return self._pressureC
+        return copy.deepcopy(self._pressureC)
 
     @pressureC.setter
     def pressureC(self, profile):
@@ -107,6 +102,166 @@ class machine_state:
         else:
             print(err)
 
+    @property
+    def activeProfile(self):
+        return copy.deepcopy(self._activeProfile)
+
+    @activeProfile.setter
+    def activeProfile(self, x):
+        if x in ActiveProfile:
+            self._activeProfile = x
+        else:
+            print('"{}" is not valid. Choose one of: {}!'.format(x, ActiveProfile))
+
+    @property
+    def language(self):
+        return copy.deepcopy(self._language)
+
+    @language.setter
+    def language(self, x):
+        if x in Language:
+            self._language = x
+        else:
+            print('"{}" is not valid. Choose one of: {}!'.format(x, Language))
+
+    @property
+    def isServiceBoilerOn(self):
+        return copy.deepcopy(self._isServiceBoilerOn)
+
+    @isServiceBoilerOn.setter
+    def isServiceBoilerOn(self, x):
+        if isinstance(x, bool):
+            self._isServiceBoilerOn = x
+        else:
+            print('"{}" is not valid. Choose a bool!'.format(x))
+
+    @property
+    def isMachineInStandby(self):
+        return copy.deepcopy(self._isMachineInStandby)
+
+    @isMachineInStandby.setter
+    def isMachineInStandby(self, x):
+        if isinstance(x, bool):
+            self._isMachineInStandby = x
+        else:
+            print('"{}" is not valid. Choose a bool!'.format(x))
+
+    @property
+    def waterSource(self):
+        return copy.deepcopy(self._waterSource)
+
+    @waterSource.setter
+    def waterSource(self, x):
+        if x in WaterSource:
+            self._waterSource = x
+        else:
+            print('"{}" is not valid. Choose one of: {}!'.format(x, WaterSource))
+
+    @property
+    def temperatureUnit(self):
+        return copy.deepcopy(self._temperatureUnit)
+
+    @temperatureUnit.setter
+    def temperatureUnit(self, x):
+        if x in TemperatureUnit:
+            self._temperatureUnit = x
+        else:
+            print('"{}" is not valid. Choose one of: {}!'.format(x, TemperatureUnit))
+
+    @property
+    def coffeeTemperature(self):
+        return copy.deepcopy(self._coffeeTemperature)
+
+    @coffeeTemperature.setter
+    def coffeeTemperature(self, x):
+        if self.temperatureUnit == 'Celsius':
+            bValid, err = self._check_range(x, Coffee_temp_C)
+        elif self.temperatureUnit == 'Fahrenheit':
+            bValid, err = self._check_range(x, Coffee_temp_F)
+        else:
+            bValid = False
+            err = 'Unit has a wrong state "{}"'.format(self.temperatureUnit)
+
+        if bValid:
+            self._coffeeTemperature = x
+        else:
+            print('Temperature ' + err)
+
+    @property
+    def steamTemperature(self):
+        return copy.deepcopy(self._steamTemperature)
+
+    @steamTemperature.setter
+    def steamTemperature(self, x):
+        if self.temperatureUnit == 'Celsius':
+            bValid, err = self._check_range(x, Steam_temp_C)
+        elif self.temperatureUnit == 'Fahrenheit':
+            bValid, err = self._check_range(x, Steam_temp_F)
+        else:
+            bValid = False
+            err = 'unit has a wrong state "{}"'.format(self.temperatureUnit)
+
+        if bValid:
+            self._steamTemperature = x
+        else:
+            print('Temperature ' + err)
+
+    @property
+    def steamCleanTime(self):
+        return copy.deepcopy(self._steamCleanTime)
+
+    @steamCleanTime.setter
+    def steamCleanTime(self, x):
+        print('Not writeable!?')
+
+    @property
+    def coffeePID(self):
+        return copy.deepcopy(self._coffeePID)
+
+    @coffeePID.setter
+    def coffeePID(self, x):
+        print('Not writeable!?')
+
+    @property
+    def groupPID(self):
+        return copy.deepcopy(self._groupPID)
+
+    @groupPID.setter
+    def groupPID(self, x):
+        print('Not writeable!?')
+
+    @property
+    def mysteryPID(self):
+        return copy.deepcopy(self._mysteryPID)
+
+    @mysteryPID.setter
+    def mysteryPID(self, x):
+        print('Not writeable!?')
+
+    @property
+    def autoOnTime(self):
+        return copy.deepcopy(self._autoOnTime)
+
+    @autoOnTime.setter
+    def autoOnTime(self, x):
+        print('Not writeable!?')
+
+    @property
+    def autoStandbyTime(self):
+        return copy.deepcopy(self._autoStandbyTime)
+
+    @autoStandbyTime.setter
+    def autoStandbyTime(self, x):
+        print('Not writeable!?')
+
+    @property
+    def autoSkipDay(self):
+        return copy.deepcopy(self._autoSkipDay)
+
+    @autoSkipDay.setter
+    def autoSkipDay(self, x):
+        print('Not writeable!?')
+
     def __init__(self):
         """
         Setting default values...
@@ -115,14 +270,14 @@ class machine_state:
         self._coffeeCyclesTotal = []
 
         # set default values
-        self._pressureA = copy.deepcopy(Default_pressureA)
-        self._pressureB = copy.deepcopy(Default_pressureB)
-        self._pressureC = copy.deepcopy(Default_pressureC)
-        self._activeProfile = 0
+        self._pressureA = Default_pressureA
+        self._pressureB = Default_pressureB
+        self._pressureC = Default_pressureC
+        self._activeProfile = 'A'
 
         self._language = 'German'
-        self._isServiceBoilerOn = None
-        self._isMachineInStandby = None
+        self._isServiceBoilerOn = True
+        self._isMachineInStandby = False
         self._waterSource = 'Tank'
 
         self._temperatureUnit = 'Celsius'
@@ -219,11 +374,11 @@ class machine_state:
 
     # ### helper functions ###
 
-    def _check_range(self, temp, min_max):
-        if temp < min_max[0] or temp > min_max[1]:
+    def _check_range(self, selected, min_max):
+        if selected < min_max[0] or selected > min_max[1]:
             bValid = False
             err = 'value "{}" is out of range [{} ... {}]!'.format(
-                temp, min_max[0], min_max[1])
+                selected, min_max[0], min_max[1])
         else:
             bValid = True
             err = ''
@@ -248,3 +403,13 @@ class machine_state:
                 break
 
         return bValid, err
+
+
+def f2c(self, f):
+    c = (f - 32) * 5 / 9
+    return round(c)
+
+
+def c2f(self, c):
+    f = (c * 9 / 5) + 32
+    return round(f)
