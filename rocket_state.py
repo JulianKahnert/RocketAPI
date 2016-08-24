@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import copy
 
@@ -180,67 +180,67 @@ class machine_state:
         fget=lambda self: copy.deepcopy(self._pressureA),
         fset=_set_pressureA,
         fdel=None,
-        doc='')
+        doc='Pressure profile A - 5 times [seconds, bars]')
 
     pressureB = property(
         fget=lambda self: copy.deepcopy(self._pressureB),
         fset=_set_pressureB,
         fdel=None,
-        doc='')
+        doc='Pressure profile B - 5 times [seconds, bars]')
 
     pressureC = property(
         fget=lambda self: copy.deepcopy(self._pressureC),
         fset=_set_pressureC,
         fdel=None,
-        doc='')
+        doc='Pressure profile C - 5 times [seconds, bars]')
 
     activeProfile = property(
         fget=lambda self: copy.deepcopy(self._activeProfile),
         fset=_set_activeProfile,
         fdel=None,
-        doc='')
+        doc='Selected profile for next run.')
 
     language = property(
         fget=lambda self: copy.deepcopy(self._language),
         fset=_set_language,
         fdel=None,
-        doc='')
+        doc='Selected language: English/German/French/Italian')
 
     isServiceBoilerOn = property(
         fget=lambda self: copy.deepcopy(self._isServiceBoilerOn),
         fset=_set_isServiceBoilerOn,
         fdel=None,
-        doc='')
+        doc='Status of steam (aka service) boiler: on/off')
 
     isMachineInStandby = property(
         fget=lambda self: copy.deepcopy(self._isMachineInStandby),
         fset=_set_isMachineInStandby,
         fdel=None,
-        doc='')
+        doc='Standby mode of R60V: on/off')
 
     waterSource = property(
         fget=lambda self: copy.deepcopy(self._waterSource),
         fset=_set_waterSource,
         fdel=None,
-        doc='')
+        doc='Status of steam (aka service) boiler: on/off')
 
     temperatureUnit = property(
         fget=lambda self: copy.deepcopy(self._temperatureUnit),
         fset=_set_temperatureUnit,
         fdel=None,
-        doc='')
+        doc='Unit of temperature: Celsius/Fahrenheit')
 
     coffeeTemperature = property(
         fget=lambda self: copy.deepcopy(self._coffeeTemperature),
         fset=_set_coffeeTemperature,
         fdel=None,
-        doc='')
+        doc='Temperature (in F or C) of coffee boiler: 85...115 °C')
 
     steamTemperature = property(
         fget=lambda self: copy.deepcopy(self._steamTemperature),
         fset=_set_steamTemperature,
         fdel=None,
-        doc='')
+        doc='Temperature (in F or C) of steam boiler: 115...125 °C')
 
     steamCleanTime = property(
         fget=lambda self: copy.deepcopy(self._steamCleanTime),
