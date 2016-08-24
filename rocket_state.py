@@ -11,31 +11,31 @@ TemperatureUnit = ['Celsius', 'Fahrenheit']
 WaterSource = ['PlumbedIn', 'Tank']
 
 # (kind of) proteced MIN/MAX values
-Pressure = {'min': 0, 'max': 14}     # bars
-Time = {'min': 0, 'max': 60}     # seconds
+Pressure = [0, 14]     # bars
+Time = [0, 60]     # seconds
 # coffee boiler in degree celsius
-Coffee_temp_C = {'min': 85, 'max': 115}
+Coffee_temp_C = [85, 115]
 # coffee boiler in degree fahrenheit
-Coffee_temp_F = {'min': 185, 'max': 239}
+Coffee_temp_F = [185, 239]
 # steam boiler in degree celsius
-Steam_temp_C = {'min': 115, 'max': 125}
+Steam_temp_C = [115, 125]
 # steam boiler in degree fahrenheit
-Steam_temp_F = {'min': 239, 'max': 257}
+Steam_temp_F = [239, 257]
 
 # pressure profiles (5x2) = [seconds, bars]
-Default_pressure_profile_A = [
+Default_pressureA = [
     [6, 4],
     [18, 9],
     [6, 5],
     [0, 0],
     [0, 0]]
-Default_pressure_profile_B = [
+Default_pressureB = [
     [8, 4],
     [22, 9],
     [0, 0],
     [0, 0],
     [0, 0]]
-Default_pressure_profile_C = [
+Default_pressureC = [
     [20, 9],
     [10, 5],
     [0, 0],
@@ -54,37 +54,90 @@ class machine_state:
     * pressureC
     """
 
+    @property
+    def coffeeCyclesSubtotal(self):
+        return self._coffeeCyclesSubtotal
+
+    @coffeeCyclesSubtotal.setter
+    def coffeeCyclesSubtotal(self, x):
+        print(x)
+        print('Not writeable!?')
+
+    @property
+    def coffeeCyclesTotal(self):
+        return self._coffeeCyclesTotal
+
+    @coffeeCyclesTotal.setter
+    def coffeeCyclesTotal(self, x):
+        print('Not writeable!?')
+
+    @property
+    def pressureA(self):
+        return self._pressureA
+
+    @pressureA.setter
+    def pressureA(self, profile):
+        bValid, err = self._check_profile(profile)
+        if bValid:
+            self._pressureA = profile
+        else:
+            print(err)
+
+    @property
+    def pressureB(self):
+        return self._pressureB
+
+    @pressureB.setter
+    def pressureB(self, profile):
+        bValid, err = self._check_profile(profile)
+        if bValid:
+            self._pressureB = profile
+        else:
+            print(err)
+
+    @property
+    def pressureC(self):
+        return self._pressureC
+
+    @pressureC.setter
+    def pressureC(self, profile):
+        bValid, err = self._check_profile(profile)
+        if bValid:
+            self._pressureC = profile
+        else:
+            print(err)
+
     def __init__(self):
         """
         Setting default values...
         """
-        self.coffeeCyclesSubtotal = []
-        self.coffeeCyclesTotal = []
+        self._coffeeCyclesSubtotal = []
+        self._coffeeCyclesTotal = []
 
         # set default values
-        self.pressureA = copy.deepcopy(Default_pressure_profile_A)
-        self.pressureB = copy.deepcopy(Default_pressure_profile_B)
-        self.pressureC = copy.deepcopy(Default_pressure_profile_C)
-        self.activeProfile = 0
+        self._pressureA = copy.deepcopy(Default_pressureA)
+        self._pressureB = copy.deepcopy(Default_pressureB)
+        self._pressureC = copy.deepcopy(Default_pressureC)
+        self._activeProfile = 0
 
-        self.language = 'German'
-        self.isServiceBoilerOn = None
-        self.isMachineInStandby = None
-        self.waterSource = 'Tank'
+        self._language = 'German'
+        self._isServiceBoilerOn = None
+        self._isMachineInStandby = None
+        self._waterSource = 'Tank'
 
-        self.temperatureUnit = 'Celsius'
-        self.coffeeTemperature = 105
-        self.steamTemperature = 123
-        self.steamCleanTime = []
+        self._temperatureUnit = 'Celsius'
+        self._coffeeTemperature = 105
+        self._steamTemperature = 123
+        self._steamCleanTime = []
 
         # PID vectors [proportional, integral, derivative]
-        self.coffeePID = []
-        self.groupPID = []
-        self.mysteryPID = []
+        self._coffeePID = []
+        self._groupPID = []
+        self._mysteryPID = []
 
-        self.autoOnTime = []
-        self.autoStandbyTime = []
-        self.autoSkipDay = []
+        self._autoOnTime = []
+        self._autoStandbyTime = []
+        self._autoSkipDay = []
 
     def evaluate_state(self):
         """
@@ -98,19 +151,19 @@ class machine_state:
         if not bValid:
             print(self.pressureA)
             print(err + ' Change to default.')
-            self.pressureA = copy.deepcopy(Default_pressure_profile_A)
+            self.pressureA = copy.deepcopy(Default_pressureA)
 
         bValid, err = self._check_profile(self.pressureB)
         if not bValid:
             print(self.pressureB)
             print(err + ' Change to default.')
-            self.pressureB = copy.deepcopy(Default_pressure_profile_B)
+            self.pressureB = copy.deepcopy(Default_pressureB)
 
         bValid, err = self._check_profile(self.pressureC)
         if not bValid:
             print(self.pressureC)
             print(err + ' Change to default.')
-            self.pressureC = copy.deepcopy(Default_pressure_profile_C)
+            self.pressureC = copy.deepcopy(Default_pressureC)
 
         # activeProfile
 
@@ -167,10 +220,10 @@ class machine_state:
     # ### helper functions ###
 
     def _check_range(self, temp, min_max):
-        if temp < min_max['min'] or temp > min_max['max']:
+        if temp < min_max[0] or temp > min_max[1]:
             bValid = False
             err = 'value "{}" is out of range [{} ... {}]!'.format(
-                temp, min_max['min'], min_max['max'])
+                temp, min_max[0], min_max[1])
         else:
             bValid = True
             err = ''
