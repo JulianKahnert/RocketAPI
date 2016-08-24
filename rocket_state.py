@@ -284,89 +284,6 @@ class machine_state:
         fdel=None,
         doc='')
 
-    def __init__(self):
-        """
-        Setting default values...
-        """
-
-    def evaluate_state(self):
-        """
-        Evaluate every setting...
-        """
-        # coffeeCyclesSubtotal
-        # coffeeCyclesTotal
-
-        # pressureA, pressureB, pressureC
-        bValid, err = self._check_profile(self.pressureA)
-        if not bValid:
-            print(self.pressureA)
-            print(err + ' Change to default.')
-            self.pressureA = copy.deepcopy(Default_pressureA)
-
-        bValid, err = self._check_profile(self.pressureB)
-        if not bValid:
-            print(self.pressureB)
-            print(err + ' Change to default.')
-            self.pressureB = copy.deepcopy(Default_pressureB)
-
-        bValid, err = self._check_profile(self.pressureC)
-        if not bValid:
-            print(self.pressureC)
-            print(err + ' Change to default.')
-            self.pressureC = copy.deepcopy(Default_pressureC)
-
-        # activeProfile
-
-        # language
-        if self.language not in Language:
-            print('Selected lanuage not available! Change to default.')
-            self.language = 'German'
-
-        # isServiceBoilerOn
-        # isMachineInStandby
-
-        # waterSource
-        if self.waterSource not in WaterSource:
-            print('Selected water source not available! Change to default.')
-            self.waterSource = 'Tank'
-
-        # temperatureUnit
-        if self.temperatureUnit not in TemperatureUnit:
-            print('Selected temperature unit not available! Change to default.')
-            self.temperatureUnit = 'Celsius'
-
-        # coffeeTemperature
-        if self.temperatureUnit == 'Celsius':
-            bValid, err = self._check_range(self.coffeeTemperature,
-                                            Coffee_temp_C)
-        elif self.temperatureUnit == 'Fahrenheit':
-            bValid, err = self._check_range(self.coffeeTemperature,
-                                            Coffee_temp_F)
-        if not bValid:
-            print('Coffee boiler temperature ' + err + ' Change to default.')
-            self.temperatureUnit = 'Celsius'
-            self.coffeeTemperature = 105
-
-        # steamTemperature
-        if self.temperatureUnit == 'Celsius':
-            bValid, err = self._check_range(self.steamTemperature,
-                                            Steam_temp_C)
-        elif self.temperatureUnit == 'Fahrenheit':
-            bValid, err = self._check_range(self.steamTemperature,
-                                            Steam_temp_F)
-        if not bValid:
-            print('Steam boiler temperature ' + err + ' Change to default.')
-            self.temperatureUnit = 'Celsius'
-            self.steamTemperature = 123
-
-        # steamCleanTime
-        # coffeePID
-        # groupPID
-        # mysteryPID
-        # autoOnTime
-        # autoStandbyTime
-        # autoSkipDay
-
     # ### helper functions ###
 
     def _check_range(self, selected, min_max):
@@ -398,13 +315,3 @@ class machine_state:
                 break
 
         return bValid, err
-
-
-def f2c(self, f):
-    c = (f - 32) * 5 / 9
-    return round(c)
-
-
-def c2f(self, c):
-    f = (c * 9 / 5) + 32
-    return round(f)
