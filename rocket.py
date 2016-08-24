@@ -1,7 +1,23 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import socket
+import argparse
 from rocket_state import machine_state
+
+
+parser = argparse.ArgumentParser(
+    description='Commandline tool to read and write data from R60V.')
+parser.add_argument('-r', '--read',
+                    dest='read',
+                    action='store_true',
+                    help='read machine state')
+
+parser.add_argument('-s', '--set',
+                    dest='test',
+                    nargs=2,
+                    action='store',
+                    help='read machine state')
+args = parser.parse_args()
 
 
 class R60V:
@@ -14,7 +30,6 @@ class R60V:
         self.machine_port = machine_port
 
         self.state = []
-
 
     def read(self):
         """
@@ -42,7 +57,6 @@ class R60V:
         write data on machine...
         """
         print('write data on machine')
-
 
     # ### HELPER FUNCTIONS ###
 
@@ -120,3 +134,28 @@ class R60V:
         cs_expected = self._checksum(message_actual)
 
         return cs_actual == cs_expected
+
+
+# external helper functions
+
+def f2c(self, f):
+    c = (f - 32) * 5 / 9
+    return round(c)
+
+
+def c2f(self, c):
+    f = (c * 9 / 5) + 32
+    return round(f)
+
+
+# COMMAND LINE INTERFACE
+
+if __name__ == "__main__":
+    obj = R60V()
+
+    if args.read:
+        print('Read machine state!')
+
+    if args.test:
+        print('Write these settings on the machine:')
+        print(args.test)
