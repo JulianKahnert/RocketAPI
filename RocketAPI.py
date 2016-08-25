@@ -35,9 +35,10 @@ class R60V:
         s.send(MESSAGE)
         data = s.recv(BUFFER_SIZE)
         s.close()
-        self._parse_state(data)
+        self.state = self._parse_state(data)
+        return self.state
 
-    def write(self):
+    def write(self, state):
         """
         write data on machine...
         """
@@ -75,7 +76,7 @@ class R60V:
         state.autoOnTime = [data.getByte(81), data.getByte(82)]
         state.autoStandbyTime = [data.getByte(83), data.getByte(84)]
         state.autoSkipDay = data.getByte(85)
-        self.state = state
+        return state
 
     def _parse_PID(self, data, offset):
         PID = []
@@ -142,19 +143,35 @@ if __name__ == "__main__":
                         dest='read',
                         action='store_true',
                         help='read machine state')
+    
+    parser.add_argument('-on', '--on',
+                        dest='on',
+                        action='store_true',
+                        help='start the machine')
+
+    parser.add_argument('-off', '--off',
+                        dest='off',
+                        action='store_true',
+                        help='shut down the machine')
 
     parser.add_argument('-s', '--set',
-                        dest='test',
+                        # dest=['key', 'value'],
                         nargs=2,
                         action='store',
-                        help='read machine state')
+                        help='change settings with a key-value pair')
     args = parser.parse_args()
 
     obj = R60V()
+    
+    if args.on:
+        print('Start the machine ...')
+
+    if args.off:
+        print('Shutting down the machine ...')
 
     if args.read:
         print('Read machine state!')
 
-    if args.test:
+    if args.setting:
         print('Write these settings on the machine:')
-        print(args.test)
+        print(args.setting)
