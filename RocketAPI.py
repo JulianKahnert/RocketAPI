@@ -155,7 +155,7 @@ if __name__ == "__main__":
                         help='shut down the machine')
 
     parser.add_argument('-s', '--set',
-                        # dest=['key', 'value'],
+                        dest='setting',
                         nargs=2,
                         action='store',
                         help='change settings with a key-value pair')

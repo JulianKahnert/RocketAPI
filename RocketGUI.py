@@ -1,22 +1,10 @@
 #!/usr/bin/env python3
 
-from bottle import route, run, template, request
+import argparse
+from bottle import route, run, request
+import socket
 
-from rocket_state import machine_state
-from rocket_state import Language
-from rocket_state import DayOfWeek
-from rocket_state import TemperatureUnit
-from rocket_state import WaterSource
-from rocket_state import ActiveProfile
-
-from rocket_state import Time
-from rocket_state import Pressure
-
-from rocket_state import Coffee_temp_C
-from rocket_state import Coffee_temp_F
-from rocket_state import Steam_temp_C
-from rocket_state import Steam_temp_F
-
+from rocket_state import *
 from RocketAPI import R60V
 
 obj = R60V()
@@ -208,4 +196,31 @@ def parse_profile(sz):
         profile.append([time, pressure])
     return profile
 
-run(host='localhost', port=65000, debug=False)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Web interface for Rocket R60V.')
+    parser.add_argument('-i', '--ip',
+                        dest='ip',
+                        action='store',
+                        help='ip adress of machine')
+
+    parser.add_argument('-p', '--port',
+                        dest='port',
+                        action='store',
+                        help='port of machine')
+    args = parser.parse_args()
+
+    if args.ip:
+        ip = args.ip
+    else:
+        ip = socket.gethostbyname(socket.gethostname())
+
+    if args.port:
+        port = int(args.port)
+    else:
+        port = 8080
+
+    print('Starting webserver at: {}:{}'.format(ip, port))
+    run(host=ip, port=port, debug=False)
