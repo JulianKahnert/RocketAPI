@@ -5,21 +5,6 @@ import argparse
 from rocket_state import machine_state
 
 
-parser = argparse.ArgumentParser(
-    description='Commandline tool to read and write data from R60V.')
-parser.add_argument('-r', '--read',
-                    dest='read',
-                    action='store_true',
-                    help='read machine state')
-
-parser.add_argument('-s', '--set',
-                    dest='test',
-                    nargs=2,
-                    action='store',
-                    help='read machine state')
-args = parser.parse_args()
-
-
 class R60V:
     def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
         """
@@ -151,6 +136,20 @@ def c2f(self, c):
 # COMMAND LINE INTERFACE
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Commandline tool to read and write data from R60V.')
+    parser.add_argument('-r', '--read',
+                        dest='read',
+                        action='store_true',
+                        help='read machine state')
+
+    parser.add_argument('-s', '--set',
+                        dest='test',
+                        nargs=2,
+                        action='store',
+                        help='read machine state')
+    args = parser.parse_args()
+
     obj = R60V()
 
     if args.read:

@@ -2,7 +2,7 @@
 
 import unittest
 import random
-from rocket import R60V
+from RocketAPI import R60V
 
 
 # known messages and their checksum (from Checksum.unit.ts)
