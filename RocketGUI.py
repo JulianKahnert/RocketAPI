@@ -8,7 +8,26 @@ from rocket_state import *
 from RocketAPI import R60V
 
 obj = R60V()
+server_data = {'ip':[], 'port':[]}
 
+@route('/on')
+def on():
+    print('Turn machine on ...')
+    #%#
+    # state = obj.read()
+    # state.isMachineInStandby = False
+    # state.isServiceBoilerOn = True
+    # obj.write(state)
+    return '<meta http-equiv="refresh" content="0; url=http://{}:{}/" />'.format(server_data['ip'], server_data['port'])
+
+@route('/off')
+def off():
+    print('Turn machine off ...')
+    #%#
+    # state = obj.read()
+    # state.isMachineInStandby = True
+    # obj.write(state)
+    return '<meta http-equiv="refresh" content="0; url=http://{}:{}/" />'.format(server_data['ip'], server_data['port'])
 
 @route('/')
 def web():
@@ -213,14 +232,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.ip:
-        ip = args.ip
+        server_data['ip'] = args.ip
     else:
-        ip = socket.gethostbyname(socket.gethostname())
+        server_data['ip'] = socket.gethostbyname(socket.gethostname())
 
     if args.port:
-        port = int(args.port)
+        server_data['port'] = int(args.port)
     else:
-        port = 8080
+        server_data['port'] = 8080
 
-    print('Starting webserver at: {}:{}'.format(ip, port))
-    run(host=ip, port=port, debug=False)
+    print('Starting webserver at: {}:{}'.format(server_data['ip'], server_data['port']))
+    run(host=server_data['ip'], port=server_data['port'], debug=False)
