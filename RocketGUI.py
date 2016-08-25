@@ -29,6 +29,7 @@ def test():
     <style>
     table, th, td {
         border: 1px solid black;
+        border-collapse: collapse;
     }
     </style>
     </head>
@@ -36,7 +37,7 @@ def test():
     <h1>Rocket R60V - Machine State</h1>
        <p>This website serves a tiny interface for your RocketR60V.</p>
     <form>
-    <table style="width:80%">
+    <table style="width:90%" align="center">
       <tr>
         <th>Setting</th><th>current state</th><th>new state</th>
       </tr>
@@ -49,7 +50,7 @@ def test():
 
     # pressureA
     html += '<tr><td>pressureA</td>'
-    html += """<td><table style="border-collapse: collapse;" align="center">
+    html += """<td><table align="center">
         <tr><th>s</th><th>bar</th></tr>
         <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
         <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
@@ -58,7 +59,7 @@ def test():
         <tr><td>{t[4][0]}</td><td>{t[4][1]}</td></tr>
         </table></td>
     """.format(t=state.pressureA)
-    html += '<td><table style="border-collapse: collapse;" align="center">'
+    html += '<td><table align="center">'
     html += '<tr><th>s</th><th>bar</th></tr>'
     for idx in [0, 1, 2, 3, 4]:
         html += '<tr>'
@@ -69,7 +70,7 @@ def test():
     
     # pressureB
     html += '<tr><td>pressureB</td>'
-    html += """<td><table style="border-collapse: collapse;" align="center">
+    html += """<td><table align="center">
         <tr><th>s</th><th>bar</th></tr>
         <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
         <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
@@ -78,7 +79,7 @@ def test():
         <tr><td>{t[4][0]}</td><td>{t[4][1]}</td></tr>
         </table></td>
     """.format(t=state.pressureB)
-    html += '<td><table style="border-collapse: collapse;" align="center">'
+    html += '<td><table align="center">'
     html += '<tr><th>s</th><th>bar</th></tr>'
     for idx in [0, 1, 2, 3, 4]:
         html += '<tr>'
@@ -89,7 +90,7 @@ def test():
 
     # pressureC
     html += '<tr><td>pressureC</td>'
-    html += """<td><table style="border-collapse: collapse;" align="center">
+    html += """<td><table align="center">
         <tr><th>s</th><th>bar</th></tr>
         <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
         <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
@@ -98,7 +99,7 @@ def test():
         <tr><td>{t[4][0]}</td><td>{t[4][1]}</td></tr>
         </table></td>
     """.format(t=state.pressureC)
-    html += '<td><table style="border-collapse: collapse;" align="center">'
+    html += '<td><table align="center">'
     html += '<tr><th>s</th><th>bar</th></tr>'
     for idx in [0, 1, 2, 3, 4]:
         html += '<tr>'
@@ -119,7 +120,7 @@ def test():
     html += '<tr><td>isServiceBoilerOn</td><td>{}</td><td><input type="checkbox" name="isServiceBoilerOn" checked></td></tr>'.format(state.isServiceBoilerOn)
 
     # isMachineInStandby
-    html += '<tr><td>isMachineInStandby</td><td>{}</td><td><input type="checkbox" name="isMachineInStandby" unchecked></td></tr>'.format(state.isServiceBoilerOn)
+    html += '<tr><td>isMachineInStandby</td><td>{}</td><td><input type="checkbox" name="isMachineInStandby" unchecked></td></tr>'.format(state.isMachineInStandby)
 
     # waterSource
     html += '<tr><td>waterSource</td><td>{}</td><td><select name="waterSource">'.format(state.waterSource) + \
