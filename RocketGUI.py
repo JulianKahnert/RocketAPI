@@ -18,7 +18,6 @@ from rocket_state import Steam_temp_C
 from rocket_state import Steam_temp_F
 
 state = machine_state()
-html_data = []
 
 @route('/')
 def web():
@@ -50,124 +49,60 @@ def web():
     """
     # coffeeCyclesSubtotal
     html += '<tr><td>coffeeCyclesSubtotal</td><td>{0}</td><td>{0}</td></tr>'.format(state.coffeeCyclesSubtotal)
-
     # coffeeCyclesTotal
     html += '<tr><td>coffeeCyclesTotal</td><td>{0}</td><td>{0}</td></tr>'.format(state.coffeeCyclesTotal)
-
     # pressureA
-    html += '<tr><td>pressureA</td>'
-    html += """<td><table align="center" valign="middle">
-        <tr><th>s</th><th>bar</th></tr>
-        <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
-        <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
-        <tr><td>{t[2][0]}</td><td>{t[2][1]}</td></tr>
-        <tr><td>{t[3][0]}</td><td>{t[3][1]}</td></tr>
-        <tr><td>{t[4][0]}</td><td>{t[4][1]}</td></tr>
-        </table></td>
-    """.format(t=state.pressureA)
-    html += '<td><table align="center">'
-    html += '<tr><th>s</th><th>bar</th></tr>'
-    for idx in [0, 1, 2, 3, 4]:
-        html += '<tr>'
-        html += '<td><input type="number" value="{t[0]}" min="{r[0]}" max="{r[1]}" step="1" name="pressureA_{i}0"/></td>'.format(t=state.pressureA[idx], r=Time, i=idx)
-        html += '<td><input type="number" value="{t[1]}" min="{r[0]}" max="{r[1]}" step="1" name="pressureA_{i}1"/></td>'.format(t=state.pressureA[idx], r=Pressure, i=idx)
-        html += '</tr>'
-    html += '</table></td></tr>'
-    
+    html += gen_pressure_profile('A', state.pressureA)
     # pressureB
-    html += '<tr><td>pressureB</td>'
-    html += """<td><table align="center" valign="middle">
-        <tr><th>s</th><th>bar</th></tr>
-        <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
-        <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
-        <tr><td>{t[2][0]}</td><td>{t[2][1]}</td></tr>
-        <tr><td>{t[3][0]}</td><td>{t[3][1]}</td></tr>
-        <tr><td>{t[4][0]}</td><td>{t[4][1]}</td></tr>
-        </table></td>
-    """.format(t=state.pressureB)
-    html += '<td><table align="center">'
-    html += '<tr><th>s</th><th>bar</th></tr>'
-    for idx in [0, 1, 2, 3, 4]:
-        html += '<tr>'
-        html += '<td><input type="number" value="{t[0]}" min="{r[0]}" max="{r[1]}" step="1" name="pressureB_{i}0"/></td>'.format(t=state.pressureB[idx], r=Time, i=idx)
-        html += '<td><input type="number" value="{t[1]}" min="{r[0]}" max="{r[1]}" step="1" name="pressureB_{i}1"/></td>'.format(t=state.pressureB[idx], r=Pressure, i=idx)
-        html += '</tr>'
-    html += '</table></td></tr>'
-
+    html += gen_pressure_profile('B', state.pressureB)
     # pressureC
-    html += '<tr><td>pressureC</td>'
-    html += """<td><table align="center" valign="middle">
-        <tr><th>s</th><th>bar</th></tr>
-        <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
-        <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
-        <tr><td>{t[2][0]}</td><td>{t[2][1]}</td></tr>
-        <tr><td>{t[3][0]}</td><td>{t[3][1]}</td></tr>
-        <tr><td>{t[4][0]}</td><td>{t[4][1]}</td></tr>
-        </table></td>
-    """.format(t=state.pressureC)
-    html += '<td><table align="center">'
-    html += '<tr><th>s</th><th>bar</th></tr>'
-    for idx in [0, 1, 2, 3, 4]:
-        html += '<tr>'
-        html += '<td><input type="number" value="{t[0]}" min="{r[0]}" max="{r[1]}" step="1" name="pressureC_{i}0"/></td>'.format(t=state.pressureC[idx], r=Time, i=idx)
-        html += '<td><input type="number" value="{t[1]}" min="{r[0]}" max="{r[1]}" step="1" name="pressureC_{i}1"/></td>'.format(t=state.pressureC[idx], r=Pressure, i=idx)
-        html += '</tr>'
-    html += '</table></td></tr>'
-
+    html += gen_pressure_profile('C', state.pressureC)
     # activeProfile
-    html += '<tr><td>activeProfile</td><td>{}</td><td><select name="activeProfile">'.format(state.activeProfile) + \
-        ''.join(['<option>{}</option>'.format(sz) for sz in ActiveProfile]) + '</select></td></tr>'
-    
+    html += gen_selection('activeProfile', state.activeProfile, ActiveProfile)
     # language
-    html += '<tr><td>language</td><td>{}</td><td><select name="language">'.format(state.language) + \
-        ''.join(['<option>{}</option>'.format(sz) for sz in Language]) + '</select></td></tr>'
-    
+    html += gen_selection('language', state.language, Language)
     # isServiceBoilerOn
-    html += '<tr><td>isServiceBoilerOn</td><td>{}</td><td><input type="checkbox" name="isServiceBoilerOn" checked></td></tr>'.format(state.isServiceBoilerOn)
-
+    html += '<tr><td>isServiceBoilerOn</td><td>{}</td><td>'.format(state.isServiceBoilerOn)
+    if state.isServiceBoilerOn:
+        html += '<input type="checkbox" name="isServiceBoilerOn" checked>'
+    else:
+        html += '<input type="checkbox" name="isServiceBoilerOn" unchecked>'
+    html += '</td></tr>'
     # isMachineInStandby
-    html += '<tr><td>isMachineInStandby</td><td>{}</td><td><input type="checkbox" name="isMachineInStandby" unchecked></td></tr>'.format(state.isMachineInStandby)
-
+    html += '<tr><td>isMachineInStandby</td><td>{}</td><td>'.format(state.isMachineInStandby)
+    if state.isMachineInStandby:
+        html += '<input type="checkbox" name="isMachineInStandby" checked>'
+    else:
+        html += '<input type="checkbox" name="isMachineInStandby" unchecked>'
+    html += '</td></tr>'
     # waterSource
-    html += '<tr><td>waterSource</td><td>{}</td><td><select name="waterSource">'.format(state.waterSource) + \
-        ''.join(['<option>{}</option>'.format(sz) for sz in WaterSource]) + '</select></td></tr>'
-
+    html += gen_selection('waterSource', state.waterSource, WaterSource)
     # temperatureUnit
-    html += '<tr><td>temperatureUnit</td><td>{}</td><td><select name="temperatureUnit">'.format(state.temperatureUnit) + \
-        ''.join(['<option>{}</option>'.format(sz) for sz in TemperatureUnit]) + '</select></td></tr>'
-
+    html += gen_selection('temperatureUnit', state.temperatureUnit, TemperatureUnit)
     # coffeeTemperature
     html += '<tr><td>coffeeTemperature</td><td>{}</td><td>'.format(state.coffeeTemperature)
     if state.temperatureUnit == 'Celsius':
         html += '<input type="number" value="{}" min="{t[0]}" max="{t[1]}" step="1" name="coffeeTemperature"/></td></tr>'.format(state.coffeeTemperature, t=Coffee_temp_C)
     else:
         html += '<input type="number" value="{}" min="{t[0]}" max="{t[1]}" step="1" name="coffeeTemperature"/></td></tr>'.format(state.coffeeTemperature, t=Coffee_temp_F)
-
     # steamTemperature
     html += '<tr><td>steamTemperature</td><td>{}</td><td>'.format(state.steamTemperature)
     if state.temperatureUnit == 'Celsius':
         html += '<input type="number" value="{0}" min="{t[0]}" max="{t[1]}" step="1" name="steamTemperature"/></td></tr>'.format(state.steamTemperature, t=Steam_temp_C)
     else:
         html += '<input type="number" value="{}" min="{t[0]}" max="{t[1]}" step="1" name="steamTemperature"/></td></tr>'.format(state.steamTemperature, t=Steam_temp_F)
-
     # steamCleanTime
     html += '<tr><td>steamCleanTime</td><td>{0}</td><td>{0}</td></tr>'.format(state.steamCleanTime)
-
     # coffeePID
     html += '<tr><td>coffeePID</td><td>{0}</td><td>{0}</td></tr>'.format(state.coffeePID)
-
     # groupPID
     html += '<tr><td>groupPID</td><td>{0}</td><td>{0}</td></tr>'.format(state.groupPID)
-
     # mysteryPID
     html += '<tr><td>mysteryPID</td><td>{0}</td><td>{0}</td></tr>'.format(state.mysteryPID)
-
     # autoOnTime
     html += '<tr><td>autoOnTime</td><td>{0}</td><td>{0}</td></tr>'.format(state.autoOnTime)
-
     # autoStandbyTime
     html += '<tr><td>autoStandbyTime</td><td>{0}</td><td>{0}</td></tr>'.format(state.autoStandbyTime)
-
     # autoSkipDay
     html += '<tr><td>autoSkipDay</td><td>{0}</td><td>{0}</td></tr>'.format(state.autoSkipDay)
 
@@ -179,7 +114,6 @@ def web():
     </body>
     </html>
     """
-    html_data = html
     return html
 
 @route('/', method='POST')
@@ -214,11 +148,42 @@ def do_web():
     # autoStandbyTime
     # autoSkipDay
 
+def gen_pressure_profile(name, state):
+    html_tmp = '<tr><td>pressure{}</td>'.format(name)
+    html_tmp += """<td><table align="center" valign="middle">
+        <tr><th>s</th><th>bar</th></tr>
+        <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
+        <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
+        <tr><td>{t[2][0]}</td><td>{t[2][1]}</td></tr>
+        <tr><td>{t[3][0]}</td><td>{t[3][1]}</td></tr>
+        <tr><td>{t[4][0]}</td><td>{t[4][1]}</td></tr>
+        </table></td>
+    """.format(t=state)
+    html_tmp += '<td><table align="center">'
+    html_tmp += '<tr><th>s</th><th>bar</th></tr>'
+    for idx in [0, 1, 2, 3, 4]:
+        html_tmp += '<tr>'
+        html_tmp += '<td><input type="number" value="{t[0]}" min="{r[0]}" max="{r[1]}" step="1" name="pressure{n}_{i}0"/></td>'.format(n=name, t=state[idx], r=Time, i=idx)
+        html_tmp += '<td><input type="number" value="{t[1]}" min="{r[0]}" max="{r[1]}" step="1" name="pressure{n}_{i}1"/></td>'.format(n=name, t=state[idx], r=Pressure, i=idx)
+        html_tmp += '</tr>'
+    html_tmp += '</table></td></tr>'
+    return html_tmp
+
+def gen_selection(property, cur_state, possible):
+    html_tmp = '<tr><td>{p}</td><td>{c}</td><td><select name="{p}">'.format(c=cur_state, p=property)
+    for sz in possible:
+        if sz == cur_state:
+            html_tmp += '<option selected>{}</option>'.format(sz)
+        else:
+            html_tmp += '<option>{}</option>'.format(sz)
+    html_tmp += '</select></td></tr>'
+    return html_tmp
+
 def parse_profile(sz):
     profile = []
     for idx in [0, 1, 2, 3, 4]:
-        time = request.forms.get('pressure{}_{}0'.format(sz, idx))
-        pressure = request.forms.get('pressure{}_{}1'.format(sz, idx))
+        time = int(request.forms.get('pressure{}_{}0'.format(sz, idx)))
+        pressure = int(request.forms.get('pressure{}_{}1'.format(sz, idx)))
         profile.append([time, pressure])
     return profile
 
