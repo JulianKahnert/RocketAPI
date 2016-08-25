@@ -287,13 +287,15 @@ class machine_state:
     # ### helper functions ###
 
     def _check_range(self, selected, min_max):
-        if selected < min_max[0] or selected > min_max[1]:
+        if min_max[0] <= selected <= min_max[1]:
+            bValid = True
+            err = ''
+
+        else:
             bValid = False
             err = 'value "{}" is out of range [{} ... {}]!'.format(
                 selected, min_max[0], min_max[1])
-        else:
-            bValid = True
-            err = ''
+            
         return bValid, err
 
     def _check_profile(self, profile):

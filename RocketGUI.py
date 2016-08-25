@@ -17,10 +17,11 @@ from rocket_state import Coffee_temp_F
 from rocket_state import Steam_temp_C
 from rocket_state import Steam_temp_F
 
+state = machine_state()
+html_data = []
 
 @route('/')
-def test():
-    state = machine_state()
+def web():
     my_dict = dict((name, getattr(state, name)) for name in dir(state) if not name.startswith('_'))
     html = """
     <!DOCTYPE html>
@@ -38,7 +39,7 @@ def test():
     <body>
     <h1>Rocket R60V - Machine State</h1>
        <p>This website serves a tiny interface for your RocketR60V.</p>
-    <form>
+    <form action="/" method="post">
     <table style="width:90%" align="center">
       <col style="width: 40%;">
       <col style="width: 30%;">
@@ -172,12 +173,53 @@ def test():
 
     html += """
     </table>
-    <input value="Update Sate" type="submit" />
+    <input value="Update State" type="submit" />
     </form>
 
     </body>
     </html>
     """
+    html_data = html
     return html
 
-run(host='localhost', port=65000, debug=True)
+@route('/', method='POST')
+def do_web():
+    # coffeeCyclesSubtotal
+    # coffeeCyclesTotal
+    # pressureA
+    state.pressureA = parse_profile('A')
+    # pressureB
+    state.pressureB = parse_profile('B')
+    # pressureC
+    state.pressureC = parse_profile('C')
+    # activeProfile
+    state.activeProfile = request.forms.get('activeProfile')
+    # language
+    state.language = request.forms.get('language')
+    # isServiceBoilerOn
+    # isMachineInStandby
+    # waterSource
+    state.waterSource = request.forms.get('waterSource')
+    # temperatureUnit
+    state.temperatureUnit = request.forms.get('temperatureUnit')
+    # coffeeTemperature
+    state.coffeeTemperature = int(request.forms.get('coffeeTemperature'))
+    # steamTemperature
+    state.steamTemperature = int(request.forms.get('steamTemperature'))
+    # steamCleanTime
+    # coffeePID
+    # groupPID
+    # mysteryPID
+    # autoOnTime
+    # autoStandbyTime
+    # autoSkipDay
+
+def parse_profile(sz):
+    profile = []
+    for idx in [0, 1, 2, 3, 4]:
+        time = request.forms.get('pressure{}_{}0'.format(sz, idx))
+        pressure = request.forms.get('pressure{}_{}1'.format(sz, idx))
+        profile.append([time, pressure])
+    return profile
+
+run(host='localhost', port=65000, debug=False)
