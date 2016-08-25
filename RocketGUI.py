@@ -30,6 +30,8 @@ def test():
     table, th, td {
         border: 1px solid black;
         border-collapse: collapse;
+        text-align:center; 
+        vertical-align:middle;
     }
     </style>
     </head>
@@ -38,6 +40,9 @@ def test():
        <p>This website serves a tiny interface for your RocketR60V.</p>
     <form>
     <table style="width:90%" align="center">
+      <col style="width: 40%;">
+      <col style="width: 30%;">
+      <col style="width: 30%;">
       <tr>
         <th>Setting</th><th>current state</th><th>new state</th>
       </tr>
@@ -50,7 +55,7 @@ def test():
 
     # pressureA
     html += '<tr><td>pressureA</td>'
-    html += """<td><table align="center">
+    html += """<td><table align="center" valign="middle">
         <tr><th>s</th><th>bar</th></tr>
         <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
         <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
@@ -70,7 +75,7 @@ def test():
     
     # pressureB
     html += '<tr><td>pressureB</td>'
-    html += """<td><table align="center">
+    html += """<td><table align="center" valign="middle">
         <tr><th>s</th><th>bar</th></tr>
         <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
         <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
@@ -90,7 +95,7 @@ def test():
 
     # pressureC
     html += '<tr><td>pressureC</td>'
-    html += """<td><table align="center">
+    html += """<td><table align="center" valign="middle">
         <tr><th>s</th><th>bar</th></tr>
         <tr><td>{t[0][0]}</td><td>{t[0][1]}</td></tr>
         <tr><td>{t[1][0]}</td><td>{t[1][1]}</td></tr>
