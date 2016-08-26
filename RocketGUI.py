@@ -86,22 +86,34 @@ def gen_template(state):
     <!DOCTYPE html>
     <html>
     <head>
-    <style>
-    table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-        vertical-align:middle;
-    }
-    tr td:nth-child(2), td:nth-child(3) {
-       text-align: center;
-    }
-    </style>
-    <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
+        <meta charset="UTF-8">
+        <title>RocketR60V UI</title>
+        <meta name="description" content="Rocket Espresso R60V web interface">
+        <meta name="author" content="Julian Kahnert">
+        <style>
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+                vertical-align:middle;
+            }
+            tr td:nth-child(2), td:nth-child(3) {
+               text-align: center;
+            }
+        </style>
+        <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
     </head>
     <body>
     <h1>Rocket R60V - Machine State</h1>
-       <p>This website serves a tiny interface for your RocketR60V. Press the button to update the machine:   <input value="Update!" type="submit"/></p>
+       <p>This website serves a tiny interface for your RocketR60V. Press the button to update the machine:</p>
     <form action="/" method="post">
+    <div style="text-align:center">
+        <input value="Update!" type="submit" onclick="myFunction()"/>
+        <script>
+        function myFunction() {
+            alert("Updating the machine...");
+        }
+        </script>
+    </div>
     <table style="width:90%" align="center">
       <col style="width: 40%;">
       <col style="width: 30%;">
@@ -251,4 +263,4 @@ if __name__ == "__main__":
         server_data['port'] = 8080
 
     print('Starting webserver at: {}:{}'.format(server_data['ip'], server_data['port']))
-    run(host=server_data['ip'], port=server_data['port'], debug=False)
+    run(host=server_data['ip'], port=server_data['port'], reloader=True, debug=False)
