@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-from bottle import route, run, request
+from bottle import route, run, request, static_file
 import socket
 
 from rocket_state import *
@@ -9,6 +9,7 @@ from RocketAPI import R60V
 
 obj = R60V()
 server_data = {'ip':[], 'port':[]}
+
 
 @route('/on')
 def on():
@@ -95,6 +96,7 @@ def gen_template(state):
        text-align: center;
     }
     </style>
+    <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
     </head>
     <body>
     <h1>Rocket R60V - Machine State</h1>
@@ -215,6 +217,13 @@ def parse_profile(sz):
         profile.append([time, pressure])
     return profile
 
+# favicon and iOS bookmark icon
+@route('/favicon.ico')
+def get_favicon():
+    return static_file('rocket.ico', root='other/')
+@route('/touch-icon-iphone-retina.png')
+def get_favicon():
+    return static_file('rocket.png', root='other/')
 
 
 if __name__ == "__main__":
