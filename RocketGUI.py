@@ -11,25 +11,6 @@ obj = R60V()
 server_data = {'ip':[], 'port':[]}
 
 
-@route('/on')
-def on():
-    print('Turn machine on ...')
-    #%#
-    # state = obj.read()
-    # state.isMachineInStandby = False
-    # state.isServiceBoilerOn = True
-    # obj.write(state)
-    return '<meta http-equiv="refresh" content="0; url=http://{}:{}/" />'.format(server_data['ip'], server_data['port'])
-
-@route('/off')
-def off():
-    print('Turn machine off ...')
-    #%#
-    # state = obj.read()
-    # state.isMachineInStandby = True
-    # obj.write(state)
-    return '<meta http-equiv="refresh" content="0; url=http://{}:{}/" />'.format(server_data['ip'], server_data['port'])
-
 @route('/')
 def web():
     #%#
@@ -79,6 +60,42 @@ def do_web():
 
     html = gen_template(state)
     return html
+
+@route('/on')
+def on():
+    print('Turn machine on ...')
+    #%#
+    # state = obj.read()
+    # state.isMachineInStandby = False
+    # state.isServiceBoilerOn = True
+    # obj.write(state)
+    return gen_redirect()
+
+@route('/off')
+def off():
+    print('Turn machine off ...')
+    #%#
+    # state = obj.read()
+    # state.isMachineInStandby = True
+    # obj.write(state)
+    return gen_redirect()
+
+
+# ### helper functions ###
+
+def gen_redirect():
+    html_tmp = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>R60V on</title>
+        <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
+        <meta http-equiv="refresh" content="0; url=http://{}:{}/" />
+    </head>
+    </html>
+    """.format(server_data['ip'], server_data['port'])
+    return html_tmp
 
 def gen_template(state):
     my_dict = dict((name, getattr(state, name)) for name in dir(state) if not name.startswith('_'))
