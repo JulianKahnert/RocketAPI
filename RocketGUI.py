@@ -69,7 +69,7 @@ def on():
     # state.isMachineInStandby = False
     # state.isServiceBoilerOn = True
     # obj.write(state)
-    return gen_redirect()
+    return gen_redirect('on')
 
 @route('/off')
 def off():
@@ -78,23 +78,23 @@ def off():
     # state = obj.read()
     # state.isMachineInStandby = True
     # obj.write(state)
-    return gen_redirect()
+    return gen_redirect('off')
 
 
 # ### helper functions ###
 
-def gen_redirect():
+def gen_redirect(mode):
     html_tmp = """
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
-        <title>R60V on</title>
-        <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
-        <meta http-equiv="refresh" content="0; url=http://{}:{}/" />
+        <title>R60V {m}</title>
+        <link rel="apple-touch-icon" sizes="120x120" href="ios-icon-{m}.png">
+        <meta http-equiv="refresh" content="0; url=http://{i}:{p}/" />
     </head>
     </html>
-    """.format(server_data['ip'], server_data['port'])
+    """.format(m=mode, i=server_data['ip'], p=server_data['port'])
     return html_tmp
 
 def gen_template(state):
@@ -117,7 +117,7 @@ def gen_template(state):
                text-align: center;
             }
         </style>
-        <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="ios-icon.png">
     </head>
     <body>
     <h1>Rocket R60V - Machine State</h1>
@@ -247,12 +247,9 @@ def parse_profile(sz):
     return profile
 
 # favicon and iOS bookmark icon
-@route('/favicon.ico')
-def get_favicon():
-    return static_file('rocket.ico', root='other/')
-@route('/touch-icon-iphone-retina.png')
-def get_favicon():
-    return static_file('rocket.png', root='other/')
+@route('/<filename:re:.*\.(jpg|png|gif|ico)>')
+def images(filename):
+    return static_file(filename, root='other/')
 
 
 if __name__ == "__main__":
