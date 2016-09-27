@@ -18,3 +18,5 @@ python3 RocketGUI.py
 ```
 python3 -m unittest unit_tests/*.py
 ```
+
+[![Build Status](https://travis-ci.org/JulianKahnert/RocketAPI.svg?branch=develop)](https://travis-ci.org/JulianKahnert/RocketAPI)
