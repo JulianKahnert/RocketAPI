@@ -3,9 +3,7 @@ os:
   - linux
   - osx
 python:
-  - "3.2"
-  - "3.3"
-  - "3.4"
+  - "3.5"
 install:
   - pip install bottle
 script: python3 -m unittest unit_tests/*.py
