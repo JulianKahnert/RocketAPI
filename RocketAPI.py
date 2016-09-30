@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
 import socket
+import time
 import argparse
 from rocket_state import machine_state
+from rocket_state import Language
+from rocket_state import DayOfWeek
+from rocket_state import TemperatureUnit
+from rocket_state import WaterSource
+from rocket_state import ActiveProfile
 
 
 class R60V:
@@ -23,26 +29,23 @@ class R60V:
         """
         # might be added (!?): BUFFER_WAIT = 200; //ms
 
-        # <https://github.com/jffry/rocket-r60v/blob/a9c657b7697bc92c3cdc9511f0aaf8b55b148e0d/src/protocol/messages/MachineState.ts#L260>
-        # MESSAGE = self._cs_attach('r00000001')
-        # MESSAGE = self._cs_attach('r00000073')
-        
-        # MESSAGE = bytes(MESSAGE, 'utf-8')
-        
-        # print(MESSAGE)
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect((self.machine_ip, self.machine_port))
-        
-        # self._parse_state()
-        print(self._read_byte(2))
+        BUFFER_SIZE = 128
+        self.s = socket.create_connection((self.machine_ip, self.machine_port), 10)
+        # get first "hello" from machine
+        print(self.s.recv(BUFFER_SIZE))
 
+        # waiting time seems to be important here
+        time.sleep(1)
 
+        self._parse_state()
+        #print(self._read_byte(2))
+       
+        #for idx in range(0, 6):
+        #    print('INDEX: {}'.format(idx))
+        #    print(self._read_byte(idx))
 
         self.s.close()
-
-        # print(data)
-        # self.state = self._parse_state(data)
-        # return self.state
+        return self.state
 
     def write(self, state):
         """
@@ -56,11 +59,25 @@ class R60V:
         # from: https://wiki.python.org/moin/TcpCommunication
         BUFFER_SIZE = 128
         # generate message
-        msg = self._cs_attach(format(idx, '04X') + format(1, '04X'))
-        print(bytes(msg, 'utf-8'))
-        self.s.send(bytes(msg, 'utf-8'))
-        data = self.s.recv(BUFFER_SIZE)
-        return data
+        request = self._cs_attach('r' + format(idx, '04X') + format(1, '04X'))
+        request = bytes(request, 'utf-8')
+        #print('-> {}'.format(request))
+        self.s.send(request)
+        raw = self.s.recv(BUFFER_SIZE)
+        #print('<- {}'.format(raw))
+        if self._cs_verify(raw):
+            # cut request and checksum
+            data = raw.split(request[:-2])[1][:-2]
+            value = int(data, 16)
+
+        else:
+            print('ERROR IN CHECKSUM!')
+            value = []
+        print('Index {} => {}'.format(idx, value))
+
+        # not very nice, but more reliable:
+        time.sleep(0.1)
+        return value
 
 
     def _parse_state(self):
@@ -73,62 +90,47 @@ class R60V:
         * getInt
         """
         state = machine_state()
-        # state.temperatureUnit = data.getByte(0)
-        # state.language = data.getByte(1)
-        # state.coffeeTemperature = data.getByte(2)
-        # state.steamTemperature = data.getByte(3)
-        # state.coffeePID = self._parse_PID(data, 4)          # 4-5, 10-11, 16-17
-        # state.coffeePID = self._parse_PID(data, 6)          # 6-7, 12-13, 18-19
-        # state.coffeePID = self._parse_PID(data, 8)          # 8-9, 14-15, 20-21
-        # state.pressureA = self._parse_profile(data, 22)     # 22-36
-        # state.pressureB = self._parse_profile(data, 38)     # 38-52
-        # state.pressureC = self._parse_profile(data, 54)     # 54-68
-        # state.waterSource = data.getByte(70)
-        # state.activeProfile = data.getByte(71)
-        # state.steamCleanTime = data.getByte(72)
-        # state.isServiceBoilerOn = data.getBoolean(73)
-        # state.isMachineInStandby = data.getBoolean(74)
-        # state.coffeeCyclesSubtotal = data.getShort(75)      # 75-76
-        # state.coffeeCyclesTotal = data.getInt(77)           # 77-80
-        # state.autoOnTime = [data.getByte(81), data.getByte(82)]
-        # state.autoStandbyTime = [data.getByte(83), data.getByte(84)]
-        # state.autoSkipDay = data.getByte(85)
-        state.temperatureUnit = self._read_byte(0)
-        state.language = self._read_byte(1)
+        state.temperatureUnit = TemperatureUnit[self._read_byte(0)]
+        state.language = Language[self._read_byte(1)]
         state.coffeeTemperature = self._read_byte(2)
         state.steamTemperature = self._read_byte(3)
-        state.coffeePID = self._parse_PID(4)          # 4-5, 10-11, 16-17
-        state.coffeePID = self._parse_PID(6)          # 6-7, 12-13, 18-19
-        state.coffeePID = self._parse_PID(8)          # 8-9, 14-15, 20-21
+        #state.coffeePID = self._parse_PID(4)          # 4-5, 10-11, 16-17
+        #state.coffeePID = self._parse_PID(6)          # 6-7, 12-13, 18-19
+        #state.coffeePID = self._parse_PID(8)          # 8-9, 14-15, 20-21
         state.pressureA = self._parse_profile(22)     # 22-36
         state.pressureB = self._parse_profile(38)     # 38-52
         state.pressureC = self._parse_profile(54)     # 54-68
-        state.waterSource = self._read_byte(70)
-        state.activeProfile = self._read_byte(71)
-        state.steamCleanTime = self._read_byte(72)
+        state.waterSource = WaterSource[self._read_byte(70)]
+        state.activeProfile = ActiveProfile[self._read_byte(71)]
+        #state.steamCleanTime = self._read_byte(72)
         state.isServiceBoilerOn = self._read_byte(73) == 1
         state.isMachineInStandby = self._read_byte(74) == 1
-        state.coffeeCyclesSubtotal = self._read_byte(75)      # 75-76
-        state.coffeeCyclesTotal = self._read_byte(77)           # 77-80
-        state.autoOnTime = [self._read_byte(81), self._read_byte(82)]
-        state.autoStandbyTime = [self._read_byte(83), self._read_byte(84)]
-        state.autoSkipDay = self._read_byte(85)
-        return state
+        #state.coffeeCyclesSubtotal = self._read_byte(75)      # 75-76
+        #state.coffeeCyclesTotal = self._read_byte(77)           # 77-80
+        #state.autoOnTime = [self._read_byte(81), self._read_byte(82)]
+        #state.autoStandbyTime = [self._read_byte(83), self._read_byte(84)]
+        #state.autoSkipDay = self._read_byte(85)
+        self.state = state
 
-    def _parse_PID(self, data, offset):
+    def _parse_PID(self, offset):
         PID = []
         PID.append(self._read_byte(offset + 0))
         PID.append(self._read_byte(offset + 6))
         PID.append(self._read_byte(offset + 12))
         return PID
 
-    def _parse_profile(self, data, offset):
+    def _parse_profile(self, offset):
         profile = []
-        profile.append([self._read_byte(offset + 0), self._read_byte(offset + 10)])
-        profile.append([self._read_byte(offset + 2), self._read_byte(offset + 11)])
-        profile.append([self._read_byte(offset + 4), self._read_byte(offset + 12)])
-        profile.append([self._read_byte(offset + 6), self._read_byte(offset + 13)])
-        profile.append([self._read_byte(offset + 8), self._read_byte(offset + 14)])
+        profile.append([self._read_byte(offset + 0) / 10,
+                        self._read_byte(offset + 10) / 10])
+        profile.append([self._read_byte(offset + 2) / 10,
+                        self._read_byte(offset + 11) / 10])
+        profile.append([self._read_byte(offset + 4) / 10,
+                        self._read_byte(offset + 12) / 10])
+        profile.append([self._read_byte(offset + 6) / 10,
+                        self._read_byte(offset + 13) / 10])
+        profile.append([self._read_byte(offset + 8) / 10,
+                        self._read_byte(offset + 14) / 10])
         return profile
 
     def _checksum(self, raw):
@@ -152,6 +154,7 @@ class R60V:
         return message_tmp
 
     def _cs_verify(self, raw):
+        raw = raw.decode('utf-8')
         # checksum max length 2 digits!?
         message_actual = raw[:-2]
         cs_actual = raw[-2:]
