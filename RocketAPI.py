@@ -37,21 +37,41 @@ class R60V:
         # waiting time seems to be important here
         time.sleep(1)
 
-        self._parse_state()
+        # get data from machine
         #print(self._read_byte(2))
        
         #for idx in range(0, 6):
         #    print('INDEX: {}'.format(idx))
         #    print(self._read_byte(idx))
 
+        self._parse_state()
+
         self.s.close()
         return self.state
 
-    def write(self, state):
+    def write(self):
         """
         write data on machine...
         """
-        print('write data on machine')
+        print('changing the standby status')
+        self.s = socket.create_connection((self.machine_ip, self.machine_port), 10)
+        # get first "hello" from machine
+        print(self.s.recv(BUFFER_SIZE))
+
+        # waiting time seems to be important here
+        time.sleep(1)
+        
+        BUFFER_SIZE = 128
+        idx = 74
+
+        # off
+        request = obj._cs_attach('w' + format(idx, '04X') + format(1, '04X') + '01')
+        # on
+        # request = obj._cs_attach('w' + format(idx, '04X') + format(1, '04X') + '00')
+
+        request = bytes(request, 'utf-8')
+        obj.s.send(request)
+        self.s.close()
 
     # ### HELPER FUNCTIONS ###
 
