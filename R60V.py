@@ -113,9 +113,27 @@ class state:
         fdel=None,
         doc='Temperature (in F or C) of steam boiler: 115...125 °C')
 
-    # BYTE 4: xxPID     # 4-5, 10-11, 16-17
-    # BYTE 6: xxPID     # 6-7, 12-13, 18-19
-    # BYTE 8: xxPID     # 8-9, 14-15, 20-21
+    # BYTE 4: coffeePID     # 4-5, 10-11, 16-17
+    coffeePID = property(
+        fset=None,
+        fget=None,
+        fdel=None,
+        doc='')
+
+    # BYTE 6: groupPID      # 6-7, 12-13, 18-19
+    groupPID = property(
+        fset=None,
+        fget=None,
+        fdel=None,
+        doc='')
+    
+    # BYTE 8: mysteryPID    # 8-9, 14-15, 20-21
+    mysteryPID = property(
+        fset=None,
+        fget=None,
+        fdel=None,
+        doc='')
+
     # BYTE 22: pressure profile A       # 22-36
     def _set_pressureA(self, profile):
         bValid, err = self._check_profile(profile)

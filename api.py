@@ -48,6 +48,7 @@ class api:
         request = bytes(request, 'utf-8')
         
         # send request
+        self.log.info('read byte #{}'.format(idx))
         self.log.info('-> {}'.format(request))
         self.s.send(request)
 
@@ -77,6 +78,7 @@ class api:
         write data on machine...
         """
         # create request
+        self.log.info('write byte #{} with value "{}"'.format(idx, value))
         request = cs_attach('w' + format(idx, '04X') + format(1, '04X') + format(value, '02X'))
         request = bytes(request, 'utf-8')
 
