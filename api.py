@@ -83,12 +83,14 @@ class api:
         request = bytes(request, 'utf-8')
 
         # send request
+        self.log.info('-> {}'.format(raw))
         self.s.send(request)
 
         # validation of write request
         time.sleep(0.1)
-        if self.read(idx) == value:
-            self.log.error('write validation failed: value not written to R60V')
+        machine_val = self.read(idx)
+        if machine_val != value:
+            self.log.error('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
 
 
 def checksum(raw):
