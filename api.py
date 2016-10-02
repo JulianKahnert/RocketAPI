@@ -10,6 +10,9 @@ class api:
         """
         Contructor
         """
+        # create logger
+        self.log = logging.getLogger('rocket.api')
+
         # connection to Rocket
         self.machine_ip = machine_ip
         self.machine_port = machine_port
@@ -21,9 +24,9 @@ class api:
 
         # get first "hello" from machine
         if self.s.recv(self.buffer_size) == b'*HELLO*':
-            logging.info('Connection established!')
+            self.log.info('Connection established!')
         else:
-            logging.critical('ERROR: machine not reachable')
+            self.log.critical('ERROR: machine not reachable')
             return
 
         # waiting time seems to be important here
@@ -34,7 +37,7 @@ class api:
         Destructor
         """
         self.s.close()
-        logging.info('Connection closed!')
+        self.log.info('Connection closed!')
 
     def read(self, idx):
         """
@@ -45,15 +48,15 @@ class api:
         request = bytes(request, 'utf-8')
         
         # send request
-        logging.info('-> {}'.format(request))
+        self.log.info('-> {}'.format(request))
         self.s.send(request)
 
         # recieve data
         try:
             raw = self.s.recv(self.buffer_size)
         except timeout:
-            logging.error('connection timed out')
-        logging.info('<- {}'.format(raw))
+            self.log.error('connection timed out')
+        self.log.info('<- {}'.format(raw))
 
         # get date from message
         if cs_verify(raw):
@@ -61,7 +64,7 @@ class api:
             data = raw.split(request[:-2])[1][:-2]
             value = int(data, 16)
         else:
-            logging.error('ERROR IN CHECKSUM!')
+            self.log.error('ERROR IN CHECKSUM!')
             value = []
 
         # not very nice, but more reliable:

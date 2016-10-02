@@ -5,6 +5,23 @@ import argparse
 import logging
 import numpy as np
 
+# create logger with 'rocket'
+logger = logging.getLogger('rocket')
+logger.setLevel(logging.DEBUG)
+# create file handler which logs even debug messages
+fh = logging.handlers.RotatingFileHandler('logs/session.log', backupCount=5)
+fh.setLevel(logging.DEBUG)
+# create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.WARNING)
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+# add the handlers to the logger
+logger.addHandler(fh)
+logger.addHandler(ch)
+
 
 class state:
     # BYTE 0: temperature unit
@@ -12,7 +29,7 @@ class state:
     
     def _set_temperatureUnit(self, x):
         if x not in self.TemperatureUnit:
-            logging.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.TemperatureUnit))
+            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.TemperatureUnit))
         else:
             self.obj.write(0, self.TemperatureUnit.index(x))
 
@@ -27,7 +44,7 @@ class state:
     
     def _set_language(self, x):
         if x not in self.Language:
-            logging.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.Language))
+            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.Language))
         else:
             self.obj.write(1, self.Language.index(x))
 
@@ -53,7 +70,7 @@ class state:
             err = 'Unit has a wrong state "{}"'.format(self.temperatureUnit)
 
         if not bValid:
-            logging.warning('Temperature ' + err)
+            self.log.warning('Temperature ' + err)
         else:
             self.obj.write(2, x)
 
@@ -79,7 +96,7 @@ class state:
             err = 'unit has a wrong state "{}"'.format(self.temperatureUnit)
 
         if not bValid:
-            logging.warning('Temperature ' + err)
+            self.log.warning('Temperature ' + err)
         else:
             self.obj.write(3, x)
 
@@ -96,7 +113,7 @@ class state:
     def _set_pressureA(self, profile):
         bValid, err = self._check_profile(profile)
         if not bValid:
-            logging.warning(err)
+            self.log.warning(err)
         else:
             self._write_profile(22, profile)
 
@@ -113,7 +130,7 @@ class state:
     
     def _set_waterSource(self, x):
         if x not in self.WaterSource:
-            logging.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.WaterSource))
+            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.WaterSource))
         else:
             self.obj.write(70, self.WaterSource.index(x))
 
@@ -128,7 +145,7 @@ class state:
 
     def _set_activeProfile(self, x):
         if x not in self.ActiveProfile:
-            logging.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.ActiveProfile))
+            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.ActiveProfile))
         else:
             self.obj.write(71, self.ActiveProfile.index(x))
     
@@ -142,7 +159,7 @@ class state:
     # BYTE 73: is service boiler on
     def _set_isServiceBoilerOn(self, x):
         if not isinstance(x, bool):
-            logging.warning('"{}" is not valid. Choose a bool!'.format(x))
+            self.log.warning('"{}" is not valid. Choose a bool!'.format(x))
         else:
             self.obj.write(73, x)
 
@@ -155,7 +172,7 @@ class state:
     # BYTE 74: is machine in standby
     def _set_isMachineInStandby(self, x):
         if not isinstance(x, bool):
-            logging.warning('"{}" is not valid. Choose a bool!'.format(x))
+            self.log.warning('"{}" is not valid. Choose a bool!'.format(x))
         else:
             self.obj.write(74, x)            
 
@@ -203,8 +220,8 @@ class state:
 
     # ### helper functions ###
     def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
-        # write a log file
-        logging.basicConfig(filename='myapp.log', level=logging.INFO)
+        # create logger
+        self.logger = logging.getLogger('rocket.state')
 
         # create connection to machine
         self.obj = api(machine_ip=machine_ip, machine_port=machine_port)
