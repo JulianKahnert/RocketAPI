@@ -85,6 +85,12 @@ class api:
         # send request
         self.s.send(request)
 
+        # validation of write request
+        time.sleep(0.1)
+        if self.read(idx) == value:
+            self.log.error('write validation failed: value not written to R60V')
+
+
 def checksum(raw):
     """
     CHECKSUM
