@@ -117,21 +117,21 @@ class state:
     # BYTE 4: coffeePID     # 4-5, 10-11, 16-17
     coffeePID = property(
         fset=None,
-        fget=None,
+        fget=lambda self: self._read_PID(4),
         fdel=None,
         doc='')
 
     # BYTE 6: groupPID      # 6-7, 12-13, 18-19
     groupPID = property(
         fset=None,
-        fget=None,
+        fget=lambda self: self._read_PID(6),
         fdel=None,
         doc='')
     
     # BYTE 8: mysteryPID    # 8-9, 14-15, 20-21
     mysteryPID = property(
         fset=None,
-        fget=None,
+        fget=lambda self: self._read_PID(8),
         fdel=None,
         doc='')
 
@@ -148,8 +148,34 @@ class state:
         fget=lambda self: self._read_profile(22),
         fdel=None,
         doc='Pressure profile A - 5 times [seconds, bars]')
+
     # BYTE 38: pressure profile B       # 38-52
+    def _set_pressureB(self, profile):
+        bValid, err = self._check_profile(profile)
+        if not bValid:
+            self.log.warning(err)
+        else:
+            self._write_profile(38, profile)
+
+    pressureB = property(
+        fset=_set_pressureB,
+        fget=lambda self: self._read_profile(38),
+        fdel=None,
+        doc='Pressure profile B - 5 times [seconds, bars]')
+
     # BYTE 54: pressure profile C       # 54-68
+    def _set_pressureC(self, profile):
+        bValid, err = self._check_profile(profile)
+        if not bValid:
+            self.log.warning(err)
+        else:
+            self._write_profile(54, profile)
+
+    pressureC = property(
+        fset=_set_pressureC,
+        fget=lambda self: self._read_profile(54),
+        fdel=None,
+        doc='Pressure profile C - 5 times [seconds, bars]')
     
     # BYTE 70: water source
     WaterSource = ['PlumbedIn', 'Tank']
@@ -301,13 +327,14 @@ class state:
         return bValid, err
 
     def _read_profile(self, offset):
-        profile = []
-        profile.append([self.api.read(offset + 0), self.api.read(offset + 10)])
-        profile.append([self.api.read(offset + 2), self.api.read(offset + 11)])
-        profile.append([self.api.read(offset + 4), self.api.read(offset + 12)])
-        profile.append([self.api.read(offset + 6), self.api.read(offset + 13)])
-        profile.append([self.api.read(offset + 8), self.api.read(offset + 14)])
-        return np.array(profile) / 10
+        profile = np.array([
+            [self.api.read(offset + 0), self.api.read(offset + 10)],
+            [self.api.read(offset + 2), self.api.read(offset + 11)],
+            [self.api.read(offset + 4), self.api.read(offset + 12)],
+            [self.api.read(offset + 6), self.api.read(offset + 13)],
+            [self.api.read(offset + 8), self.api.read(offset + 14)]])
+        profile = profile / 10  # deciseconds => seconds, decibar => bar
+        return profile
 
     def _write_profile(self, offset, profile):
         p = np.array(profile) * 10
@@ -316,6 +343,13 @@ class state:
         self.api.write(offset + 4, p[2][0]), self.api.write(offset + 12, p[2][1])
         self.api.write(offset + 6, p[3][0]), self.api.write(offset + 13, p[3][1])
         self.api.write(offset + 8, p[4][0]), self.api.write(offset + 14, p[4][1])
+
+    def _read_PID(self, offset):
+        profile = np.array([
+            self.api.read(offset + 0),
+            self.api.read(offset + 6),
+            self.api.read(offset + 12)])
+        return profile
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

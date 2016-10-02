@@ -53,10 +53,7 @@ class api:
         self.s.send(request)
 
         # recieve data
-        try:
-            raw = self.s.recv(self.buffer_size)
-        except timeout:
-            self.log.error('connection timed out')
+        raw = self.s.recv(self.buffer_size)
         self.log.info('<- {}'.format(raw))
 
         # get date from message
@@ -77,6 +74,9 @@ class api:
         """
         write data on machine...
         """
+        # no floats allowed
+        value = int(value)
+
         # create request
         self.log.info('write byte #{} with value "{}"'.format(idx, value))
         request = cs_attach('w' + format(idx, '04X') + format(1, '04X') + format(value, '02X'))
