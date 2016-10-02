@@ -10,6 +10,7 @@ import numpy as np
 logger = logging.getLogger('rocket')
 logger.setLevel(logging.DEBUG)
 # create file handler which logs even debug messages
+logging.handlers.RotatingFileHandler.doRollover()
 fh = logging.handlers.RotatingFileHandler('logs/session.log', mode='w', backupCount=5)
 fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
