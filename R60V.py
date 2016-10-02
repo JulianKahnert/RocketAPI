@@ -6,6 +6,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import numpy as np
 import os
+import re
 
 
 # create logger with 'rocket'
@@ -38,11 +39,11 @@ class state:
         if x not in self.TemperatureUnit:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.TemperatureUnit))
         else:
-            self.obj.write(0, self.TemperatureUnit.index(x))
+            self.api.write(0, self.TemperatureUnit.index(x))
 
     temperatureUnit = property(
         fset=_set_temperatureUnit,
-        fget=lambda self: self.TemperatureUnit[self.obj.read(0)],
+        fget=lambda self: self.TemperatureUnit[self.api.read(0)],
         fdel=None,
         doc='Unit of temperature: Celsius/Fahrenheit')
 
@@ -53,11 +54,11 @@ class state:
         if x not in self.Language:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.Language))
         else:
-            self.obj.write(1, self.Language.index(x))
+            self.api.write(1, self.Language.index(x))
 
     language = property(
         fset=_set_language,
-        fget=lambda self: self.Language[self.obj.read(1)],
+        fget=lambda self: self.Language[self.api.read(1)],
         fdel=None,
         doc='Selected language: English/German/French/Italian')
 
@@ -79,11 +80,11 @@ class state:
         if not bValid:
             self.log.warning('Temperature ' + err)
         else:
-            self.obj.write(2, x)
+            self.api.write(2, x)
 
     coffeeTemperature = property(
         fset=_set_coffeeTemperature,
-        fget=lambda self: self.obj.read(2),
+        fget=lambda self: self.api.read(2),
         fdel=None,
         doc='Temperature (in F or C) of coffee boiler: 85...115 °C')
 
@@ -105,11 +106,11 @@ class state:
         if not bValid:
             self.log.warning('Temperature ' + err)
         else:
-            self.obj.write(3, x)
+            self.api.write(3, x)
 
     steamTemperature = property(
         fset=_set_steamTemperature,
-        fget=lambda self: self.obj.read(3),
+        fget=lambda self: self.api.read(3),
         fdel=None,
         doc='Temperature (in F or C) of steam boiler: 115...125 °C')
 
@@ -157,11 +158,11 @@ class state:
         if x not in self.WaterSource:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.WaterSource))
         else:
-            self.obj.write(70, self.WaterSource.index(x))
+            self.api.write(70, self.WaterSource.index(x))
 
     waterSource = property(
         fset=_set_waterSource,
-        fget=lambda self: self.WaterSource[self.obj.read(70)],
+        fget=lambda self: self.WaterSource[self.api.read(70)],
         fdel=None,
         doc='Selected water source: "plumbed in" or "tank"')
     
@@ -172,11 +173,11 @@ class state:
         if x not in self.ActiveProfile:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.ActiveProfile))
         else:
-            self.obj.write(71, self.ActiveProfile.index(x))
+            self.api.write(71, self.ActiveProfile.index(x))
     
     activeProfile = property(
         fset=_set_activeProfile,
-        fget=lambda self: self.ActiveProfile[self.obj.read(71)],
+        fget=lambda self: self.ActiveProfile[self.api.read(71)],
         fdel=None,
         doc='Selected profile for next run.')
 
@@ -186,11 +187,11 @@ class state:
         if not isinstance(x, bool):
             self.log.warning('"{}" is not valid. Choose a bool!'.format(x))
         else:
-            self.obj.write(73, x)
+            self.api.write(73, x)
 
     isServiceBoilerOn = property(
         fset=_set_isServiceBoilerOn,
-        fget=lambda self: self.obj.read(73) == 1,
+        fget=lambda self: self.api.read(73) == 1,
         fdel=None,
         doc='Status of steam (aka service) boiler: on/off')
 
@@ -199,61 +200,73 @@ class state:
         if not isinstance(x, bool):
             self.log.warning('"{}" is not valid. Choose a bool!'.format(x))
         else:
-            self.obj.write(74, x)            
+            self.api.write(74, x)            
 
     isMachineInStandby = property(
         fset=_set_isMachineInStandby,
-        fget=lambda self: self.obj.read(74) == 1,
+        fget=lambda self: self.api.read(74) == 1,
         fdel=None,
         doc='Standby mode of R60V: on/off')
 
     # BYTE 75: NOT TESTED coffee cycles subtotal   # 75-76
     coffeeCyclesSubtotal = property(
         fset=None,
-        fget=lambda self: [self.obj.read(75), self.obj.read(76)],
+        fget=lambda self: [self.api.read(75), self.api.read(76)],
         fdel=None,
         doc='')
 
     # BYTE 77: NOT TESTED coffee cycles total      # 77-80
     coffeeCyclesTotal = property(
         fset=None,
-        fget=lambda self: [self.obj.read(idx) for idx in range(77, 81)],
+        fget=lambda self: [self.api.read(idx) for idx in range(77, 81)],
         fdel=None,
         doc='')
 
     # BYTE 81: NOT TESTED auto on time     # 81-82
     autoOnTime = property(
         fset=None,
-        fget=lambda self: [self.obj.read(81), self.obj.read(82)],
+        fget=lambda self: [self.api.read(81), self.api.read(82)],
         fdel=None,
         doc='')
 
     # BYTE 83: NOT TESTED auto standby time    # 83-84
     autoStandbyTime = property(
         fset=None,
-        fget=lambda self: [self.obj.read(83), self.obj.read(84)],
+        fget=lambda self: [self.api.read(83), self.api.read(84)],
         fdel=None,
         doc='')
 
     # BYTE 85: NOT TESTED auto skip day
     autoSkipDay = property(
         fset=None,
-        fget=lambda self: self.obj.read(85),
+        fget=lambda self: self.api.read(85),
         fdel=None,
         doc='')
 
-
-    # ### helper functions ###
     def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
         # create logger
-        self.logger = logging.getLogger('rocket.state')
+        self.log = logging.getLogger('rocket.state')
+
+        # check if RocketEspresso SSID is available
+        if re.search('RocketEspresso', os.popen('iwlist scan').read()) is not None:
+            self.log.debug('SSID "RocketEspresso" found')
+        else:
+            self.log.critical('SSID "RocketEspresso" not found')
+
+        # ip adress from DHCP server of R60V?
+        if os.popen('ifconfig | grep "192.168.1."').read():
+            self.log.debug('ip adress from DHCP server of R60V available')
+        else:
+            self.log.critical('*no* ip adress from DHCP server of R60V available')
 
         # create connection to machine
-        self.obj = api(machine_ip=machine_ip, machine_port=machine_port)
+        self.api = api(machine_ip=machine_ip, machine_port=machine_port)
 
     def __del__(self):
-        del self.obj
+        self.log.debug('deleting api object')
+        del self.api
 
+    # ### helper functions ###
     def _check_range(self, selected, min_max):
         if min_max[0] <= selected <= min_max[1]:
             bValid = True
@@ -289,20 +302,20 @@ class state:
 
     def _read_profile(self, offset):
         profile = []
-        profile.append([self.obj.read(offset + 0), self.obj.read(offset + 10)])
-        profile.append([self.obj.read(offset + 2), self.obj.read(offset + 11)])
-        profile.append([self.obj.read(offset + 4), self.obj.read(offset + 12)])
-        profile.append([self.obj.read(offset + 6), self.obj.read(offset + 13)])
-        profile.append([self.obj.read(offset + 8), self.obj.read(offset + 14)])
+        profile.append([self.api.read(offset + 0), self.api.read(offset + 10)])
+        profile.append([self.api.read(offset + 2), self.api.read(offset + 11)])
+        profile.append([self.api.read(offset + 4), self.api.read(offset + 12)])
+        profile.append([self.api.read(offset + 6), self.api.read(offset + 13)])
+        profile.append([self.api.read(offset + 8), self.api.read(offset + 14)])
         return np.array(profile) / 10
 
     def _write_profile(self, offset, profile):
         p = np.array(profile) * 10
-        self.obj.write(offset + 0, p[0][0]), self.obj.write(offset + 10, p[0][1])
-        self.obj.write(offset + 2, p[1][0]), self.obj.write(offset + 11, p[1][1])
-        self.obj.write(offset + 4, p[2][0]), self.obj.write(offset + 12, p[2][1])
-        self.obj.write(offset + 6, p[3][0]), self.obj.write(offset + 13, p[3][1])
-        self.obj.write(offset + 8, p[4][0]), self.obj.write(offset + 14, p[4][1])
+        self.api.write(offset + 0, p[0][0]), self.api.write(offset + 10, p[0][1])
+        self.api.write(offset + 2, p[1][0]), self.api.write(offset + 11, p[1][1])
+        self.api.write(offset + 4, p[2][0]), self.api.write(offset + 12, p[2][1])
+        self.api.write(offset + 6, p[3][0]), self.api.write(offset + 13, p[3][1])
+        self.api.write(offset + 8, p[4][0]), self.api.write(offset + 14, p[4][1])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
