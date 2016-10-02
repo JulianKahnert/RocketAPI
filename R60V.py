@@ -3,15 +3,17 @@
 from api import api
 import argparse
 import logging
-import logging.handlers
+from logging.handlers import RotatingFileHandler
 import numpy as np
 
 # create logger with 'rocket'
 logger = logging.getLogger('rocket')
 logger.setLevel(logging.DEBUG)
+# rotating session logs: perform a rollover before the next session begins
+fh = RotatingFileHandler('logs/session.log', mode='a', backupCount=10)                                                                                          
+fh.doRollover()                                                                                                                                   
 # create file handler which logs even debug messages
-logging.handlers.RotatingFileHandler.doRollover()
-fh = logging.handlers.RotatingFileHandler('logs/session.log', mode='w', backupCount=5)
+fh = RotatingFileHandler('logs/session.log', mode='w', backupCount=10)
 fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
