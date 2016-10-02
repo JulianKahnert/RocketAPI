@@ -41,7 +41,7 @@ class api:
         Read data
         """
         # generate message
-        request = self._cs_attach('r' + format(idx, '04X') + format(1, '04X'))
+        request = cs_attach('r' + format(idx, '04X') + format(1, '04X'))
         request = bytes(request, 'utf-8')
         
         # send request
@@ -56,7 +56,7 @@ class api:
         logging.info('<- {}'.format(raw))
 
         # get date from message
-        if self._cs_verify(raw):
+        if cs_verify(raw):
             # cut request and checksum
             data = raw.split(request[:-2])[1][:-2]
             value = int(data, 16)
@@ -74,37 +74,42 @@ class api:
         write data on machine...
         """
         # create request
-        request = self._cs_attach('w' + format(idx, '04X') + format(1, '04X') + format(value, '02X'))
+        request = cs_attach('w' + format(idx, '04X') + format(1, '04X') + format(value, '02X'))
         request = bytes(request, 'utf-8')
 
         # send request
         self.s.send(request)
 
-    def _checksum(self, raw):
-        """
-        CHECKSUM
+def checksum(raw):
+    """
+    CHECKSUM
 
-        calculate function from:
-        nodejs/src/protocol/Checksum.ts
-        nodejs/src/protocol/Checksum.unit.ts
-        """
-        value = 0
-        for sz in raw:
-            value += ord(sz)
-        value_hex = hex(value & 255)[2:].upper()
-        if len(value_hex) < 2:
-            value_hex = '0' + value_hex
-        return value_hex
-
-    def _cs_attach(self, message_tmp):
-        message_tmp += self._checksum(message_tmp)
-        return message_tmp
-
-    def _cs_verify(self, raw):
+    calculate function from:
+    nodejs/src/protocol/Checksum.ts
+    nodejs/src/protocol/Checksum.unit.ts
+    """
+    if isinstance(raw, bytes):
         raw = raw.decode('utf-8')
-        # checksum max length 2 digits
-        message_actual = raw[:-2]
-        cs_actual = raw[-2:]
-        cs_expected = self._checksum(message_actual)
+    
+    value = 0
+    for sz in raw:
+        value += ord(sz)
+    value_hex = hex(value & 255)[2:].upper()
+    if len(value_hex) < 2:
+        value_hex = '0' + value_hex
+    return value_hex
 
-        return cs_actual == cs_expected
+def cs_attach(message_tmp):
+    message_tmp += checksum(message_tmp)
+    return message_tmp
+
+def cs_verify(raw):
+    if isinstance(raw, bytes):
+        raw = raw.decode('utf-8')
+
+    # checksum max length 2 digits
+    message_actual = raw[:-2]
+    cs_actual = raw[-2:]
+    cs_expected = checksum(message_actual)
+
+    return cs_actual == cs_expected
