@@ -361,6 +361,7 @@ if __name__ == "__main__":
                         help='change settings with a key-value pair')
     args = parser.parse_args()
     obj = state()
+    time.sleep(0.2)
     if args.on:
         print('Start the machine ...')
         obj.isMachineInStandby = False
