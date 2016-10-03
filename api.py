@@ -57,7 +57,11 @@ class api:
             self.s.send(request)
 
             # recieve data
-            raw = self.s.recv(self.buffer_size)
+            try:
+                raw = self.s.recv(self.buffer_size)
+            except socket.timeout:
+                self.log.error('socket timed out')
+                raise RuntimeError('Socket timed out!')
             self.log.debug('<- {}'.format(raw))
 
             # verify message and checksum
