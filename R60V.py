@@ -21,15 +21,16 @@ fh.doRollover()
 fh = RotatingFileHandler(path, mode='w', backupCount=10)
 fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
-ch = logging.StreamHandler(stream=sys.stdout)
-ch.setLevel(logging.WARNING)
-# create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
+sh = logging.StreamHandler(stream=sys.stdout)
+sh.setLevel(logging.WARNING)
+# create formatters and add them to the handlers
+form_fh = logging.Formatter('%H:%M:%S - %(name)s - %(levelname)s - %(message)s')
+form_sh = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(form_fh)
+sh.setFormatter(form_sh)
 # add the handlers to the logger
 logger.addHandler(fh)
-logger.addHandler(ch)
+logger.addHandler(sh)
 
 
 class state:
