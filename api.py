@@ -47,29 +47,35 @@ class api:
         request = cs_attach('r' + format(idx, '04X') + format(1, '04X'))
         request = bytes(request, 'utf-8')
         
-        # send request
-        self.log.info('read byte #{}'.format(idx))
-        self.log.info('-> {}'.format(request))
-        self.s.send(request)
+        # try to read data 3 times, if valid break
+        for k in range(3):
+            self.log.info('read byte #{} (run {})'.format(idx, k + 1))
+            # not very nice, but more reliable:
+            time.sleep(0.1)
 
-        # recieve data
-        raw = self.s.recv(self.buffer_size)
-        self.log.info('<- {}'.format(raw))
+            # send request
+            self.log.debug('-> {}'.format(request))
+            self.s.send(request)
 
-        # verify message and checksum
-        if request[:9] != raw[:9]:
-            self.log.error('error in message: wrong byte recieved')
-            return []
-        elif not cs_verify(raw):
-            self.log.error('error in checksum')
-            return []
+            # recieve data
+            raw = self.s.recv(self.buffer_size)
+            self.log.debug('<- {}'.format(raw))
+
+            # verify message and checksum
+            if request[:9] != raw[:9]:
+                self.log.error('error in message: wrong byte recieved')
+                return []
+            elif not cs_verify(raw):
+                self.log.error('error in checksum')
+                return []
+            else:
+                break
 
         # cut request and checksum
         data = raw.split(request[:-2])[1][:-2]
         value = int(data, 16)
+        self.log.debug('recieved value: "{}"'.format(value))
 
-        # not very nice, but more reliable:
-        time.sleep(0.1)
         return value
 
     def write(self, idx, value):
@@ -85,11 +91,11 @@ class api:
         request = bytes(request, 'utf-8')
 
         # send request
-        self.log.info('-> {}'.format(request))
+        self.log.debug('-> {}'.format(request))
         self.s.send(request)
 
         # validation of write request
-        time.sleep(0.1)
+        time.sleep(0.5)
         machine_val = self.read(idx)
         if machine_val != value:
             self.log.error('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
