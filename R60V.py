@@ -270,15 +270,17 @@ class state:
         if re.search('RocketEspresso', os.popen('iwlist wlan0 scan').read()) is not None:
             self.log.debug('SSID "RocketEspresso" found')
         else:
-            self.log.critical('SSID "RocketEspresso" not found')
-            return
+            err = 'SSID "RocketEspresso" not found'
+            self.log.critical(err)
+            raise RuntimeError(err)
 
         # ip adress from DHCP server of R60V?
         if os.popen('ifconfig | grep "192.168.1."').read():
             self.log.debug('ip adress from DHCP server of R60V available')
         else:
-            self.log.critical('no ip adress from DHCP server of R60V available')
-            return
+            err = 'no ip adress from DHCP server of R60V available'
+            self.log.critical(err)
+            raise RuntimeError(err)
 
         # create connection to machine
         self.api = api(machine_ip=machine_ip, machine_port=machine_port)

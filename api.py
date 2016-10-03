@@ -26,6 +26,7 @@ class api:
             self.log.info('connection established')
         else:
             self.log.critical('machine not reachable')
+            raise RuntimeError('machine not reachable')
 
         # waiting time seems to be important here
         time.sleep(0.5)
@@ -60,7 +61,7 @@ class api:
                 raw = self.s.recv(self.buffer_size)
             except socket.timeout:
                 self.log.error('socket timed out')
-                return []
+                raise RuntimeError('Socket timed out!')
             self.log.debug('<- {}'.format(raw))
 
             # verify message and checksum
@@ -71,7 +72,7 @@ class api:
                 break
             elif k == 2:
                 self.log.error('error with message - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
-                return []
+                raise RuntimeError('Invalid message from machine!')
 
         # cut request and checksum
         data = raw.split(request[:-2])[1][:-2]
