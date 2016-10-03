@@ -77,7 +77,7 @@ class state:
             self._check_range(x, self.Coffee_temp_F, 'Temperature ')
         else:
             self.log.error('Temperature unit has a wrong state "{}"'.format(unit))
-            raise RuntimeError('Temperature unit has a wrong state "{}"'.format(unit))
+            return
         self.api.write(2, x)
 
     coffeeTemperature = property(
@@ -100,7 +100,7 @@ class state:
             self._check_range(x, self.Steam_temp_F, 'Temperature ')
         else:
             self.log.error('Temperature unit has a wrong state "{}"'.format(unit))
-            raise RuntimeError('Temperature unit has a wrong state "{}"'.format(unit))
+            return
         self.api.write(3, x)
 
     steamTemperature = property(
@@ -270,14 +270,14 @@ class state:
             self.log.debug('SSID "RocketEspresso" found')
         else:
             self.log.critical('SSID "RocketEspresso" not found')
-            raise RuntimeError('SSID "RocketEspresso" not found')
+            return
 
         # ip adress from DHCP server of R60V?
         if os.popen('ifconfig | grep "192.168.1."').read():
             self.log.debug('ip adress from DHCP server of R60V available')
         else:
             self.log.critical('no ip adress from DHCP server of R60V available')
-            raise RuntimeError('no ip adress from DHCP server of R60V available')
+            return
 
         # create connection to machine
         self.api = api(machine_ip=machine_ip, machine_port=machine_port)
