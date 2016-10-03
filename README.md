@@ -3,9 +3,8 @@
 * 
 
 # Requirements
-```
-sudo pip install bottle
-```
+* Python: `sudo pip install bottle` 
+* linux interface `wlan0` must be conntected to "RocketEspresso" WLAN
 
 # Webserver
 ```

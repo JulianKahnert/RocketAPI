@@ -69,18 +69,15 @@ class state:
     Coffee_temp_F = [185, 239]
 
     def _set_coffeeTemperature(self, x):
-        if self.temperatureUnit == 'Celsius':
-            bValid, err = self._check_range(x, self.Coffee_temp_C)
-        elif self.temperatureUnit == 'Fahrenheit':
-            bValid, err = self._check_range(x, self.Coffee_temp_F)
+        unit = self.temperatureUnit
+        if unit == 'Celsius':
+            self._check_range(x, self.Coffee_temp_C, 'Temperature ')
+        elif unit == 'Fahrenheit':
+            self._check_range(x, self.Coffee_temp_F, 'Temperature ')
         else:
-            bValid = False
-            err = 'Unit has a wrong state "{}"'.format(self.temperatureUnit)
-
-        if not bValid:
-            self.log.warning('Temperature ' + err)
-        else:
-            self.api.write(2, x)
+            self.log.error('Temperature unit has a wrong state "{}"'.format(unit))
+            raise RuntimeError('Temperature unit has a wrong state "{}"'.format(unit))
+        self.api.write(2, x)
 
     coffeeTemperature = property(
         fset=_set_coffeeTemperature,
@@ -95,18 +92,15 @@ class state:
     Steam_temp_F = [239, 257]
 
     def _set_steamTemperature(self, x):
-        if self.temperatureUnit == 'Celsius':
-            bValid, err = self._check_range(x, self.Steam_temp_C)
-        elif self.temperatureUnit == 'Fahrenheit':
-            bValid, err = self._check_range(x, self.Steam_temp_F)
+        unit = self.temperatureUnit
+        if unit == 'Celsius':
+            self._check_range(x, self.Steam_temp_C, 'Temperature ')
+        elif unit == 'Fahrenheit':
+            self._check_range(x, self.Steam_temp_F, 'Temperature ')
         else:
-            bValid = False
-            err = 'unit has a wrong state "{}"'.format(self.temperatureUnit)
-
-        if not bValid:
-            self.log.warning('Temperature ' + err)
-        else:
-            self.api.write(3, x)
+            self.log.error('Temperature unit has a wrong state "{}"'.format(unit))
+            raise RuntimeError('Temperature unit has a wrong state "{}"'.format(unit))
+        self.api.write(3, x)
 
     steamTemperature = property(
         fset=_set_steamTemperature,
@@ -137,11 +131,8 @@ class state:
 
     # BYTE 22: pressure profile A       # 22-36
     def _set_pressureA(self, profile):
-        bValid, err = self._check_profile(profile)
-        if not bValid:
-            self.log.warning(err)
-        else:
-            self._write_profile(22, profile)
+        self._check_profile(profile)
+        self._write_profile(22, profile)
 
     pressureA = property(
         fset=_set_pressureA,
@@ -151,11 +142,8 @@ class state:
 
     # BYTE 38: pressure profile B       # 38-52
     def _set_pressureB(self, profile):
-        bValid, err = self._check_profile(profile)
-        if not bValid:
-            self.log.warning(err)
-        else:
-            self._write_profile(38, profile)
+        self._check_profile(profile)
+        self._write_profile(38, profile)
 
     pressureB = property(
         fset=_set_pressureB,
@@ -165,11 +153,8 @@ class state:
 
     # BYTE 54: pressure profile C       # 54-68
     def _set_pressureC(self, profile):
-        bValid, err = self._check_profile(profile)
-        if not bValid:
-            self.log.warning(err)
-        else:
-            self._write_profile(54, profile)
+        self._check_profile(profile)
+        self._write_profile(54, profile)
 
     pressureC = property(
         fset=_set_pressureC,
@@ -280,16 +265,18 @@ class state:
         self.log = logging.getLogger('rocket.state')
 
         # check if RocketEspresso SSID is available
-        if re.search('RocketEspresso', os.popen('iwlist scan').read()) is not None:
+        if re.search('RocketEspresso', os.popen('iwlist wlan0 scan').read()) is not None:
             self.log.debug('SSID "RocketEspresso" found')
         else:
             self.log.critical('SSID "RocketEspresso" not found')
+            raise RuntimeError('SSID "RocketEspresso" not found')
 
         # ip adress from DHCP server of R60V?
         if os.popen('ifconfig | grep "192.168.1."').read():
             self.log.debug('ip adress from DHCP server of R60V available')
         else:
-            self.log.critical('*no* ip adress from DHCP server of R60V available')
+            self.log.critical('no ip adress from DHCP server of R60V available')
+            raise RuntimeError('no ip adress from DHCP server of R60V available')
 
         # create connection to machine
         self.api = api(machine_ip=machine_ip, machine_port=machine_port)
@@ -299,17 +286,11 @@ class state:
         del self.api
 
     # ### helper functions ###
-    def _check_range(self, selected, min_max):
-        if min_max[0] <= selected <= min_max[1]:
-            bValid = True
-            err = ''
-
-        else:
-            bValid = False
-            err = 'value "{}" is out of range [{} ... {}]!'.format(
-                selected, min_max[0], min_max[1])
-            
-        return bValid, err
+    def _check_range(self, selected, min_max, pre):
+        if not(min_max[0] <= selected <= min_max[1]):
+            err = '{}value "{}" is out of range [{} ... {}]!'.format(pre, selected, min_max[0], min_max[1])
+            self.log.error(err)
+            raise RuntimeError(err)
     
     def _check_profile(self, profile):
         # set default values
@@ -319,18 +300,11 @@ class state:
         Pressure = [0, 14]  # bars
         Time = [0, 60]      # seconds
         # look at each of the 5 settings
-        for num in [0, 1, 2, 3, 4]:
+        for num in range(5):
             # check temperature
-            bValid, err = self._check_range(profile[num][0], Time)
-            if not bValid:
-                err = 'Time ' + err
-                break
+            self._check_range(profile[num][0], Time, 'Time ')
             # check pressure
-            bValid, err = self._check_range(profile[num][1], Pressure)
-            if not bValid:
-                err = 'Pressure ' + err
-                break
-        return bValid, err
+            self._check_range(profile[num][1], Pressure, 'Pressure ')
 
     def _read_profile(self, offset):
         profile = np.array([

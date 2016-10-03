@@ -16,7 +16,6 @@ class api:
         # connection to Rocket
         self.machine_ip = machine_ip
         self.machine_port = machine_port
-
         self.buffer_size = 128
 
         # establishing the connection
@@ -24,10 +23,10 @@ class api:
 
         # get first "hello" from machine
         if self.s.recv(self.buffer_size) == b'*HELLO*':
-            self.log.info('Connection established!')
+            self.log.info('connection established')
         else:
-            self.log.critical('ERROR: machine not reachable')
-            return
+            self.log.critical('machine not reachable')
+            raise RuntimeError('machine not reachable')
 
         # waiting time seems to be important here
         time.sleep(0.5)
@@ -62,20 +61,19 @@ class api:
             self.log.debug('<- {}'.format(raw))
 
             # verify message and checksum
-            if request[:9] != raw[:9]:
-                self.log.error('error in message: wrong byte recieved')
-                return []
-            elif not cs_verify(raw):
-                self.log.error('error in checksum')
-                return []
-            else:
+            bLen = len(raw) == 13
+            bSame = request[:9] == raw[:9]
+            bChecksum = cs_verify(raw)
+            if bLen and bSame and bChecksum:
                 break
+            elif k == 2:
+                self.log.error('error with message - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
+                raise RuntimeError('Invalid message from machine!')
 
         # cut request and checksum
         data = raw.split(request[:-2])[1][:-2]
         value = int(data, 16)
         self.log.debug('recieved value: "{}"'.format(value))
-
         return value
 
     def write(self, idx, value):
@@ -98,7 +96,7 @@ class api:
         time.sleep(0.5)
         machine_val = self.read(idx)
         if machine_val != value:
-            self.log.error('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
+            self.log.warning('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
 
 
 def checksum(raw):
@@ -132,5 +130,4 @@ def cs_verify(raw):
     message_actual = raw[:-2]
     cs_actual = raw[-2:]
     cs_expected = checksum(message_actual)
-
     return cs_actual == cs_expected
