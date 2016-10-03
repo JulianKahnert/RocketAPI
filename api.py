@@ -19,7 +19,7 @@ class api:
         self.buffer_size = 128
 
         # establishing the connection
-        self.s = socket.create_connection((self.machine_ip, self.machine_port), 10)
+        self.s = socket.create_connection((self.machine_ip, self.machine_port), timeout=3)
 
         # get first "hello" from machine
         if self.s.recv(self.buffer_size) == b'*HELLO*':
@@ -27,9 +27,6 @@ class api:
         else:
             self.log.critical('machine not reachable')
             raise RuntimeError('machine not reachable')
-
-        # waiting time seems to be important here
-        time.sleep(0.5)
 
     def __del__(self):
         """
@@ -49,8 +46,9 @@ class api:
         # try to read data 3 times, if valid break
         for k in range(3):
             self.log.info('read byte #{} (run {})'.format(idx, k + 1))
-            # not very nice, but more reliable:
-            time.sleep(0.1)
+            if k != 0:
+                # not very nice, but more reliable:
+                time.sleep(0.1)
 
             # send request
             self.log.debug('-> {}'.format(request))
@@ -61,7 +59,11 @@ class api:
                 raw = self.s.recv(self.buffer_size)
             except socket.timeout:
                 self.log.error('socket timed out')
-                raise RuntimeError('Socket timed out!')
+                if k != 2:
+                    continue
+                else:
+                    raise RuntimeError('Socket timed out!')
+
             self.log.debug('<- {}'.format(raw))
 
             # verify message and checksum
@@ -97,7 +99,7 @@ class api:
         self.s.send(request)
 
         # validation of write request
-        time.sleep(0.5)
+        time.sleep(0.2)
         machine_val = self.read(idx)
         if machine_val != value:
             self.log.warning('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
