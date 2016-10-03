@@ -33,7 +33,6 @@ class api:
         Destructor
         """
         self.s.close()
-        self.log.info('Connection closed!')
 
     def read(self, idx):
         """

@@ -8,6 +8,7 @@ import numpy as np
 import os
 import re
 import sys
+import time
 
 
 # create logger with 'rocket'
@@ -286,7 +287,6 @@ class state:
         self.api = api(machine_ip=machine_ip, machine_port=machine_port)
 
     def __del__(self):
-        self.log.debug('deleting api object')
         del self.api
 
     # ### helper functions ###
