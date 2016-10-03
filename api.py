@@ -56,18 +56,20 @@ class api:
         raw = self.s.recv(self.buffer_size)
         self.log.info('<- {}'.format(raw))
 
-        # get date from message
-        if cs_verify(raw):
-            # cut request and checksum
-            data = raw.split(request[:-2])[1][:-2]
-            value = int(data, 16)
-        else:
-            self.log.error('ERROR IN CHECKSUM!')
-            value = []
+        # verify message and checksum
+        if request[:9] != raw[:9]:
+            self.log.error('error in message: wrong byte recieved')
+            return []
+        elif not cs_verify(raw):
+            self.log.error('error in checksum')
+            return []
+
+        # cut request and checksum
+        data = raw.split(request[:-2])[1][:-2]
+        value = int(data, 16)
 
         # not very nice, but more reliable:
         time.sleep(0.1)
-
         return value
 
     def write(self, idx, value):

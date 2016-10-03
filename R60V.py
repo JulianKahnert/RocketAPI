@@ -208,6 +208,12 @@ class state:
         doc='Selected profile for next run.')
 
     # BYTE 72: steam clean time
+    steamCleanTime = property(
+        fset=None,
+        fget=lambda self: self.api.read(72),
+        fdel=None,
+        doc='')
+
     # BYTE 73: is service boiler on
     def _set_isServiceBoilerOn(self, x):
         if not isinstance(x, bool):
