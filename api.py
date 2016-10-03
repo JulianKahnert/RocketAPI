@@ -99,7 +99,7 @@ class api:
         self.s.send(request)
 
         # validation of write request
-        time.sleep(0.2)
+        time.sleep(0.8)
         machine_val = self.read(idx)
         if machine_val != value:
             self.log.warning('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
