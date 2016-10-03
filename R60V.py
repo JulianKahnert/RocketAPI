@@ -24,7 +24,7 @@ fh.setLevel(logging.DEBUG)
 sh = logging.StreamHandler(stream=sys.stdout)
 sh.setLevel(logging.WARNING)
 # create formatters and add them to the handlers
-form_fh = logging.Formatter('%H:%M:%S - %(name)s - %(levelname)s - %(message)s')
+form_fh = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', '%H:%M:%S')
 form_sh = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
 fh.setFormatter(form_fh)
 sh.setFormatter(form_sh)
