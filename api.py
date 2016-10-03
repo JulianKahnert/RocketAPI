@@ -85,7 +85,7 @@ class api:
         request = bytes(request, 'utf-8')
 
         # send request
-        self.log.info('-> {}'.format(raw))
+        self.log.info('-> {}'.format(request))
         self.s.send(request)
 
         # validation of write request
