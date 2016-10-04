@@ -107,10 +107,6 @@ class api:
 def checksum(raw):
     """
     CHECKSUM
-
-    calculate function from:
-    nodejs/src/protocol/Checksum.ts
-    nodejs/src/protocol/Checksum.unit.ts
     """
     if isinstance(raw, bytes):
         raw = raw.decode('utf-8')
