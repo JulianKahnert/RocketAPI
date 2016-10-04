@@ -57,12 +57,17 @@ class api:
             try:
                 raw = self.s.recv(self.buffer_size)
             except socket.timeout:
-                self.log.error('socket timed out')
                 if k != 2:
+                    self.log.warning('socket timed out - retry to read ...')
                     continue
                 else:
-                    raise RuntimeError('Socket timed out!')
-
+                    err = 'socket timed out'
+                    self.log.error(err)
+                    raise RuntimeError(err)
+            except (ConnectionResetError, BrokenPipeError):
+                err = 'connection broken: unable to continue, please create a new state object'
+                self.log.error(err)
+                raise RuntimeError(err)
             self.log.debug('<- {}'.format(raw))
 
             # verify message and checksum
