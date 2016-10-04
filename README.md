@@ -41,19 +41,12 @@ obj.isMachineInStandby = False
 del obj
 ```
 
-# Webserver
-```
-python3 RocketGUI.py
-
-@hourly		cd /PATH/TO/RocketAPI/ && git reset --hard develop && git pull --rebase --stat origin develop
-```
-
 # ToDo
 * more tools in CLI
 * WebApp `RocketGUI.py`
 
 # Unit Testing
-* Build Status: [![Build Status](https://travis-ci.org/JulianKahnert/RocketAPI.svg?branch=develop)](https://travis-ci.org/JulianKahnert/RocketAPI)
+* Build Status: [![Build Status](https://travis-ci.org/JulianKahnert/RocketAPI.svg?branch=master)](https://travis-ci.org/JulianKahnert/RocketAPI)
 * `python3 -m unittest unit_tests/*.py`
 
 # Acknowledgment
