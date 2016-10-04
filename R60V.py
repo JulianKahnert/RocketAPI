@@ -336,9 +336,35 @@ class state:
         return profile
 
 if __name__ == "__main__":
+    # create logger and set level
+    log = logging.getLogger('rocket.cli')
+    # create console handler with a higher log level
+    sh = logging.StreamHandler(stream=sys.stdout)
+    sh.setLevel(logging.INFO)
+    # create formatters and add them to the handlers
+    form_sh = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    sh.setFormatter(form_sh)
+    # add the handlers to the logger
+    log.addHandler(sh)
+
     parser = argparse.ArgumentParser(
         description='Commandline tool to read and write data from R60V.')
-    
+
+    parser.add_argument('-da', '--defaultA',
+                        dest='defaultA',
+                        action='store_true',
+                        help='set pressure profile A to defaults')
+
+    parser.add_argument('-db', '--defaultB',
+                        dest='defaultB',
+                        action='store_true',
+                        help='set pressure profile B to defaults')
+
+    parser.add_argument('-dc', '--defaultC',
+                        dest='defaultC',
+                        action='store_true',
+                        help='set pressure profile C to defaults')
+
     parser.add_argument('-on', '--on',
                         dest='on',
                         action='store_true',
@@ -348,6 +374,11 @@ if __name__ == "__main__":
                         dest='off',
                         action='store_true',
                         help='shut down the machine')
+
+    parser.add_argument('-p', '--profile',
+                        dest='profile',
+                        action='store',
+                        help='set active profile A/B/C')
 
     parser.add_argument('-r', '--read',
                         dest='read',
@@ -359,19 +390,42 @@ if __name__ == "__main__":
                         nargs=2,
                         action='store',
                         help='change settings with a key-value pair')
+
     args = parser.parse_args()
     obj = state()
     time.sleep(0.2)
+    if args.defaultA:
+        profile = np.array([[6, 4], [18, 9], [6, 5], [0, 0], [0, 0]])
+        log.info('Set pressure profile A to defaults:')
+        log.info(profile)
+        obj.pressureA = profile
+
+    if args.defaultB:
+        profile = np.array([[8, 4], [22, 9], [0, 0], [0, 0], [0, 0]])
+        log.info('Set pressure profile B to defaults:')
+        log.info(profile)
+        obj.pressureB = profile
+
+    if args.defaultC:
+        profile = np.array([[20, 9], [10, 5], [0, 0], [0, 0], [0, 0]])
+        log.info('Set pressure profile C to defaults:')
+        log.info(profile)
+        obj.pressureC = profile
+
     if args.on:
-        print('Start the machine ...')
+        log.info('Start the machine ...')
         obj.isMachineInStandby = False
 
     if args.off:
-        print('Shutting down the machine ...')
+        log.info('Shutting down the machine ...')
         obj.isMachineInStandby = True
 
+    if args.profile:
+        log.info('Setting profile to "{}"'.format(args.profile))
+        obj.activeProfile = args.profile
+
     if args.read:
-        print(getattr(obj, args.read))
+        log.info(getattr(obj, args.read))
 
     if args.setting:
         prop = args.setting[0]
@@ -379,9 +433,9 @@ if __name__ == "__main__":
         if prop in dir(state):
             if prop in ['coffeeTemperature', 'isMachineInStandby', 'isServiceBoilerOn', 'steamTemperature']:
                 val = int(val)
-            print('Setting attribute "{}"" to "{}".'.format(prop, val))
+            log.info('Setting attribute "{}"" to "{}".'.format(prop, val))
             setattr(obj, args.setting[0], args.setting[1])
         else:
-            print('ERROR: property not in machine state.')
+            log.error('ERROR: property not in machine state.')
     
     del obj
