@@ -14,8 +14,8 @@ class api:
         request = cs_attach('r' + format(idx, '04X') + format(1, '04X'))
         request = bytes(request, 'utf-8')
 
-        self.log.info('read byte #{} (run {})'.format(idx, k + 1))
-        if k != 0:
+        self.log.info('read byte #{} (run {})'.format(idx, run_num + 1))
+        if run_num != 0:
             # not very nice, but more reliable:
             time.sleep(0.1)
 
@@ -23,8 +23,8 @@ class api:
         self.log.debug('-> {}'.format(request))
         self.s.send(request)
 
-        # recieve data
         try:
+            # recieve data
             raw = self.s.recv(self.buffer_size)
 
         except socket.timeout:
@@ -45,9 +45,7 @@ class api:
         bLen = len(raw) == 13
         bSame = request[:9] == raw[:9]
         bChecksum = cs_verify(raw)
-        if bLen and bSame and bChecksum:
-            break
-        elif k == 2:
+        if not (bLen and bSame and bChecksum) and run_num == 2:
             critical(self.log,
                      'invalid message from machine - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
 
