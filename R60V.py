@@ -426,7 +426,6 @@ if __name__ == "__main__":
 
     if args.read:
         log.info('recieved: {} = {}'.format(args.read, getattr(obj, args.read)))
-        return args.read
 
     if args.setting:
         prop = args.setting[0]
