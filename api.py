@@ -32,6 +32,7 @@ class api:
             if run_num < 3:
                 self.log.warning('socket timed out - retry to read ...')
                 self.read(idx, run_num + 1)
+                return
             else:
                 critical(self.log, 'socket timed out')
 
@@ -45,9 +46,13 @@ class api:
         bLen = len(raw) == 13
         bSame = request[:9] == raw[:9]
         bChecksum = cs_verify(raw)
-        if not (bLen and bSame and bChecksum) and run_num == 2:
-            critical(self.log,
-                     'invalid message from machine - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
+        if not (bLen and bSame and bChecksum):
+            if run_num < 2:
+                self.log.warning('something (len: {}, same: {}, checksum: {}) went wrong, retry...'.format(bLen, bSame, bChecksum))
+                self.read(idx, run_num + 1)
+                return
+            else:
+                critical(self.log, 'invalid message from machine - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
 
         # cut request and checksum
         data = raw.split(request[:-2])[1][:-2]

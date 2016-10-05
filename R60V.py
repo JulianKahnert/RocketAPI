@@ -375,7 +375,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--profile',
                         dest='profile',
                         action='store',
-                        help='set active profile A/B/C')
+                        help='set active profile: A/B/C')
 
     parser.add_argument('-r', '--read',
                         dest='read',
