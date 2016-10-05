@@ -17,7 +17,7 @@ class api:
         self.log.info('read byte #{} (run {})'.format(idx, run_num + 1))
         if run_num != 0:
             # not very nice, but more reliable:
-            time.sleep(0.1)
+            time.sleep(0.5)
 
         # send request
         self.log.debug('-> {}'.format(request))
@@ -30,15 +30,14 @@ class api:
         except socket.timeout:
             # try to read data 3 times, if valid break
             if run_num < 3:
-                self.log.warning('socket timed out - retry to read ...')
+                self.log.warning('run {}: socket timed out - retry to read ...'.format(run_num + 1))
                 self.read(idx, run_num + 1)
                 return
             else:
-                critical(self.log, 'socket timed out')
+                critical(self.log, 'run {}: socket timed out several times => create a new state object'.format(run_num + 1))
 
         except (ConnectionResetError, BrokenPipeError):
-            critical(self.log,
-                     'connection broken: unable to continue, please create a new state object')
+            critical(self.log,'connection broken (run {}): unable to continue, please create a new state object'.format(run_num + 1))
 
         self.log.debug('<- {}'.format(raw))
 
