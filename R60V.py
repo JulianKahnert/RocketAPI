@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from api import api
+from api import critical
 import argparse
 import logging
 from logging.handlers import RotatingFileHandler
@@ -16,8 +17,8 @@ logger = logging.getLogger('rocket')
 logger.setLevel(logging.DEBUG)
 # rotating session logs: perform a rollover before the next session begins
 path = os.path.realpath(__file__).split(__file__)[0] + 'logs/session.log'
-fh = RotatingFileHandler(path, mode='a', backupCount=10)                                                                                          
-fh.doRollover()                                                                                                                                   
+fh = RotatingFileHandler(path, mode='a', backupCount=10)
+fh.doRollover()
 # create file handler which logs even debug messages
 fh = RotatingFileHandler(path, mode='w', backupCount=10)
 fh.setLevel(logging.DEBUG)
@@ -37,7 +38,7 @@ logger.addHandler(sh)
 class state:
     # BYTE 0: temperature unit
     TemperatureUnit = ['Celsius', 'Fahrenheit']
-    
+
     def _set_temperatureUnit(self, x):
         if x not in self.TemperatureUnit:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.TemperatureUnit))
@@ -52,7 +53,7 @@ class state:
 
     # BYTE 1: language
     Language = ['English', 'German', 'French', 'Italian']
-    
+
     def _set_language(self, x):
         if x not in self.Language:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.Language))
@@ -124,7 +125,7 @@ class state:
         fget=lambda self: self._read_PID(6),
         fdel=None,
         doc='')
-    
+
     # BYTE 8: mysteryPID    # 8-9, 14-15, 20-21
     mysteryPID = property(
         fset=None,
@@ -164,10 +165,10 @@ class state:
         fget=lambda self: self._read_profile(54),
         fdel=None,
         doc='Pressure profile C - 5 times [seconds, bars]')
-    
+
     # BYTE 70: water source
     WaterSource = ['PlumbedIn', 'Tank']
-    
+
     def _set_waterSource(self, x):
         if x not in self.WaterSource:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.WaterSource))
@@ -179,7 +180,7 @@ class state:
         fget=lambda self: self.WaterSource[self.api.read(70)],
         fdel=None,
         doc='Selected water source: "plumbed in" or "tank"')
-    
+
     # BYTE 71: active profile
     ActiveProfile = ['A', 'B', 'C']
 
@@ -188,7 +189,7 @@ class state:
             self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.ActiveProfile))
         else:
             self.api.write(71, self.ActiveProfile.index(x))
-    
+
     activeProfile = property(
         fset=_set_activeProfile,
         fget=lambda self: self.ActiveProfile[self.api.read(71)],
@@ -220,7 +221,7 @@ class state:
         if not isinstance(x, bool):
             self.log.warning('"{}" is not valid. Choose a bool!'.format(x))
         else:
-            self.api.write(74, x)            
+            self.api.write(74, x)
 
     isMachineInStandby = property(
         fset=_set_isMachineInStandby,
@@ -271,17 +272,13 @@ class state:
         if re.search('RocketEspresso', os.popen('iwlist wlan0 scan').read()) is not None:
             self.log.debug('SSID "RocketEspresso" found')
         else:
-            err = 'SSID "RocketEspresso" not found'
-            self.log.critical(err)
-            raise RuntimeError(err)
+            critical(self.log, 'SSID "RocketEspresso" not found')
 
         # ip adress from DHCP server of R60V?
         if os.popen('ifconfig | grep "192.168.1."').read():
             self.log.debug('ip adress from DHCP server of R60V available')
         else:
-            err = 'no ip adress from DHCP server of R60V available'
-            self.log.critical(err)
-            raise RuntimeError(err)
+            critical(self.log, 'no ip adress from DHCP server of R60V available')
 
         # create connection to machine
         self.api = api(machine_ip=machine_ip, machine_port=machine_port)
@@ -292,10 +289,9 @@ class state:
     # ### helper functions ###
     def _check_range(self, selected, min_max, pre):
         if not(min_max[0] <= selected <= min_max[1]):
-            err = '{}value "{}" is out of range [{} ... {}]!'.format(pre, selected, min_max[0], min_max[1])
-            self.log.error(err)
-            raise RuntimeError(err)
-    
+            critical(self.log, '{}value "{}" is out of range [{} ... {}]!'.format(
+                pre, selected, min_max[0], min_max[1]))
+
     def _check_profile(self, profile):
         # set default values
         err = []
@@ -437,5 +433,5 @@ if __name__ == "__main__":
             setattr(obj, args.setting[0], args.setting[1])
         else:
             log.error('ERROR: property not in machine state.')
-    
+
     del obj
