@@ -284,7 +284,8 @@ class state:
         self.api = api(machine_ip=machine_ip, machine_port=machine_port)
 
     def __del__(self):
-        del self.api
+        self.log.info('run destructor')
+        self.api.close()
 
     # ### helper functions ###
     def _check_range(self, selected, min_max, pre):

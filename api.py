@@ -6,33 +6,6 @@ import time
 
 
 class api:
-    def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
-        """
-        Contructor
-        """
-        # create logger
-        self.log = logging.getLogger('rocket.api')
-
-        # connection to Rocket
-        self.machine_ip = machine_ip
-        self.machine_port = machine_port
-        self.buffer_size = 128
-
-        # establishing the connection
-        self.s = socket.create_connection((self.machine_ip, self.machine_port), timeout=3)
-
-        # get first "hello" from machine
-        if self.s.recv(self.buffer_size) == b'*HELLO*':
-            self.log.info('connection established')
-        else:
-            critical(self.log, 'machine not reachable')
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        self.s.close()
-
     def read(self, idx, run_num=0):
         """
         Read data
@@ -105,6 +78,35 @@ class api:
         machine_val = self.read(idx)
         if machine_val != value:
             self.log.warning('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
+
+    def close(self):
+        """
+        Destructor
+        """
+        self.log.info('close connection to machine')
+        self.s.close()
+
+    def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
+        """
+        Contructor
+        """
+        # create logger
+        self.log = logging.getLogger('rocket.api')
+
+        # connection to Rocket
+        self.machine_ip = machine_ip
+        self.machine_port = machine_port
+        self.buffer_size = 128
+
+        # establishing the connection
+        self.s = socket.create_connection(
+            (self.machine_ip, self.machine_port), timeout=3)
+
+        # get first "hello" from machine
+        if self.s.recv(self.buffer_size) == b'*HELLO*':
+            self.log.info('connection established')
+        else:
+            critical(self.log, 'machine not reachable')
 
 
 def critical(log_obj, msg):
