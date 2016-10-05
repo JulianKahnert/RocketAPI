@@ -34,6 +34,10 @@ sh.setFormatter(form_sh)
 logger.addHandler(fh)
 logger.addHandler(sh)
 
+# set default pressure profiles
+DefaultProfileA = np.array([[6, 4], [18, 9], [6, 5], [0, 0], [0, 0]])
+DefaultProfileC = np.array([[20, 9], [10, 5], [0, 0], [0, 0], [0, 0]])
+DefaultProfileB = np.array([[8, 4], [22, 9], [0, 0], [0, 0], [0, 0]])
 
 class state:
     # BYTE 0: temperature unit
@@ -314,6 +318,7 @@ class state:
             [self.api.read(offset + 4), self.api.read(offset + 12)],
             [self.api.read(offset + 6), self.api.read(offset + 13)],
             [self.api.read(offset + 8), self.api.read(offset + 14)]])
+        self.log.info('recieved profile (offset={}): {}'.format(offset, profile))
         profile = profile / 10  # deciseconds => seconds, decibar => bar
         return profile
 
@@ -392,22 +397,19 @@ if __name__ == "__main__":
     obj = state()
     time.sleep(0.2)
     if args.defaultA:
-        profile = np.array([[6, 4], [18, 9], [6, 5], [0, 0], [0, 0]])
         log.info('Set pressure profile A to defaults:')
-        log.info(profile)
-        obj.pressureA = profile
+        log.info(DefaultProfileA)
+        obj.pressureA = DefaultProfileA
 
     if args.defaultB:
-        profile = np.array([[8, 4], [22, 9], [0, 0], [0, 0], [0, 0]])
         log.info('Set pressure profile B to defaults:')
-        log.info(profile)
-        obj.pressureB = profile
+        log.info(DefaultProfileB)
+        obj.pressureB = DefaultProfileB
 
     if args.defaultC:
-        profile = np.array([[20, 9], [10, 5], [0, 0], [0, 0], [0, 0]])
         log.info('Set pressure profile C to defaults:')
-        log.info(profile)
-        obj.pressureC = profile
+        log.info(DefaultProfileC)
+        obj.pressureC = DefaultProfileC
 
     if args.on:
         log.info('Start the machine ...')
@@ -419,10 +421,12 @@ if __name__ == "__main__":
 
     if args.profile:
         log.info('Setting profile to "{}"'.format(args.profile))
+        time.sleep(0.5)
         obj.activeProfile = args.profile
 
     if args.read:
-        log.info(getattr(obj, args.read))
+        log.info('recieved: {} = {}'.format(args.read, getattr(obj, args.read)))
+        return args.read
 
     if args.setting:
         prop = args.setting[0]
