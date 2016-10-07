@@ -13,8 +13,8 @@ Have a lot of fun...
 
 # Workflow
 ### CLI
-* Turn machine on: `python3 R60V.py -on`
-* Turn machine off: `python3 R60V.py -off`
+* Turn machine on: `./R60V.py -on` or `python3 R60V.py -on`
+* Turn machine off: `./R60V.py -off` or `python3 R60V.py -off`
 
 ### python3 console
 ```python

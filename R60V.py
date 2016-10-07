@@ -15,8 +15,9 @@ import time
 # create logger with 'rocket'
 logger = logging.getLogger('rocket')
 logger.setLevel(logging.DEBUG)
+# create path of log file
+path = os.path.dirname(os.path.realpath(__file__)) + '/logs/session.log'
 # rotating session logs: perform a rollover before the next session begins
-path = os.path.realpath(__file__).split(__file__)[0] + 'logs/session.log'
 fh = RotatingFileHandler(path, mode='a', backupCount=10)
 fh.doRollover()
 # create file handler which logs even debug messages
