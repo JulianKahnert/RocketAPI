@@ -8,7 +8,7 @@ Have a lot of fun...
 
 # Requirements
 * repo: `git clone https://github.com/JulianKahnert/RocketAPI.git`
-* Python: `sudo pip install bottle` 
+* Python: `sudo pip3 install bottle` 
 * linux network interface `wlan0` must be conntected to "RocketEspresso" WLAN
 
 # Workflow
