@@ -1,6 +1,6 @@
 This toolkit helps you to read and properties of your [Rocket R60V](http://www.rocket-espresso.it/r-60v.html)!
 
-In this first state you can use the command line interface (CLI) and the Python 3 class. The next step will be some more CLI commands and a little WebApp. I am open for more suggestions!
+In this first state you can use the command line interface (CLI) and the Python 3 class. The next step will be a little WebApp. I am open for more suggestions!
 
 Have a lot of fun...
 
