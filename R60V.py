@@ -319,8 +319,8 @@ class state:
             [self._api.read(offset + 4), self._api.read(offset + 12)],
             [self._api.read(offset + 6), self._api.read(offset + 13)],
             [self._api.read(offset + 8), self._api.read(offset + 14)]])
-        self._log.info('recieved profile (offset={}): {}'.format(offset, profile))
-        profile = profile / 10  # deciseconds => seconds, decibar => bar
+        self._log.info('received profile (offset={}): {}'.format(offset, profile))
+        profile = profile / 10  # decisecond => second, decibar => bar
         return profile
 
     def _write_profile(self, offset, profile):
@@ -352,7 +352,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description='Command-line tool to read and write data from R60V.',
-        epilog="""\
+        epilog="""
 List of all R60V properties and their possible values ([] means: not writable):
     * activeProfile             [A/B/C]
     * autoOnTime                []
@@ -361,7 +361,7 @@ List of all R60V properties and their possible values ([] means: not writable):
     * coffeeCyclesSubtotal      []
     * coffeeCyclesTotal         []
     * coffeePID                 []
-    * coffeeTemperature         C:[85...115] F:[185...239]
+    * coffeeTemperature         [105], e.g. 85...115 C or 185...239 F
     * groupPID                  []
     * isMachineInStandby        [True/False]
     * isServiceBoilerOn         [True/False]
@@ -371,9 +371,11 @@ List of all R60V properties and their possible values ([] means: not writable):
     * pressureB                 default: [[20, 9], [10, 5], [0, 0], [0, 0], [0, 0]]
     * pressureC                 default: [[ 8, 4], [22, 9], [0, 0], [0, 0], [0, 0]]
     * steamCleanTime            []
-    * steamTemperature          C:[115...125] F:[239...257]
+    * steamTemperature          [124], e.g. 115...125 C or 239...257 F
     * temperatureUnit           [Celsius/Fahrenheit]
     * waterSource               [PlumbedIn/Tank]
+
+All pressure profiles contain 5 steps with [0...60 seconds, 0...14 bars] in decisecond/-bar precision.
         """,
         formatter_class=argparse.RawTextHelpFormatter)
 
@@ -405,61 +407,68 @@ List of all R60V properties and their possible values ([] means: not writable):
     parser.add_argument('-p', '--profile',
                         dest='profile',
                         action='store',
-                        help='set active profile: A/B/C')
+                        help='set active profile to A, B or C')
 
     parser.add_argument('-r', '--read',
                         dest='read',
                         action='store',
-                        help='read machine state')
+                        help='read machine state, see properties below')
 
     parser.add_argument('-s', '--set',
                         dest='setting',
                         nargs=2,
                         action='store',
-                        help='change settings with a key-value pair')
+                        help='change settings with a key-value pair, see properties below')
 
     args = parser.parse_args()
-    obj = state()
-    time.sleep(0.2)
-    if args.defaultA:
-        log.info('Set pressure profile A to defaults:')
-        log.info(DefaultProfileA)
-        obj.pressureA = DefaultProfileA
 
-    if args.defaultB:
-        log.info('Set pressure profile B to defaults:')
-        log.info(DefaultProfileB)
-        obj.pressureB = DefaultProfileB
+    # print help when script is called without any argument
+    if len(sys.argv) < 2:
+        parser.print_help()
+        parser.exit(1)
 
-    if args.defaultC:
-        log.info('Set pressure profile C to defaults:')
-        log.info(DefaultProfileC)
-        obj.pressureC = DefaultProfileC
+    else:
+        obj = state()
+        time.sleep(0.2)
+        if args.defaultA:
+            log.info('Set pressure profile A to defaults:')
+            log.info(DefaultProfileA)
+            obj.pressureA = DefaultProfileA
 
-    if args.on:
-        log.info('Start the machine ...')
-        obj.isMachineInStandby = False
+        if args.defaultB:
+            log.info('Set pressure profile B to defaults:')
+            log.info(DefaultProfileB)
+            obj.pressureB = DefaultProfileB
 
-    if args.off:
-        log.info('Shutting down the machine ...')
-        obj.isMachineInStandby = True
+        if args.defaultC:
+            log.info('Set pressure profile C to defaults:')
+            log.info(DefaultProfileC)
+            obj.pressureC = DefaultProfileC
 
-    if args.profile:
-        log.info('Setting profile to "{}"'.format(args.profile))
-        obj.activeProfile = args.profile
+        if args.on:
+            log.info('Start the machine ...')
+            obj.isMachineInStandby = False
 
-    if args.read:
-        log.info('received: {} = {}'.format(args.read, getattr(obj, args.read)))
+        if args.off:
+            log.info('Shutting down the machine ...')
+            obj.isMachineInStandby = True
 
-    if args.setting:
-        prop = args.setting[0]
-        val = args.setting[1]
-        if prop in dir(state):
-            if prop in ['coffeeTemperature', 'isMachineInStandby', 'isServiceBoilerOn', 'steamTemperature']:
-                val = int(val)
-            log.info('Setting attribute "{}"" to "{}".'.format(prop, val))
-            setattr(obj, args.setting[0], args.setting[1])
-        else:
-            log.error('ERROR: property not in machine state.')
+        if args.profile:
+            log.info('Setting profile to "{}"'.format(args.profile))
+            obj.activeProfile = args.profile
 
-    del obj
+        if args.read:
+            log.info('received: {} = {}'.format(args.read, getattr(obj, args.read)))
+
+        if args.setting:
+            prop = args.setting[0]
+            val = args.setting[1]
+            if prop in dir(state):
+                if prop in ['coffeeTemperature', 'isMachineInStandby', 'isServiceBoilerOn', 'steamTemperature']:
+                    val = int(val)
+                log.info('Setting attribute "{}"" to "{}".'.format(prop, val))
+                setattr(obj, args.setting[0], args.setting[1])
+            else:
+                log.error('ERROR: property not in machine state.')
+
+        del obj
