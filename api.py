@@ -48,8 +48,7 @@ class api:
         if not (bLen and bSame and bChecksum):
             if run_num < 2:
                 self.log.warning('something (len: {}, same: {}, checksum: {}) went wrong, retry...'.format(bLen, bSame, bChecksum))
-                self.read(idx, run_num + 1)
-                return
+                return self.read(idx, run_num + 1)
             else:
                 critical(self.log, 'invalid message from machine - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
 
@@ -78,7 +77,7 @@ class api:
         # validation of write request
         time.sleep(1)
         machine_val = self.read(idx)
-        if machine_val != value:
+        if not machine_val == value:
             self.log.warning('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
 
     def close(self):
