@@ -15,8 +15,9 @@ class api:
         request = bytes(request, 'utf-8')
 
         self.log.info('read byte #{} (run {})'.format(idx, run_num + 1))
-        if run_num != 0:
-            # not very nice, but more reliable:
+
+        # not very nice, but more reliable:
+        if not run_num == 0:
             time.sleep(0.5)
 
         # send request
