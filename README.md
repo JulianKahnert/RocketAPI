@@ -36,7 +36,7 @@ del obj                             # delete obj to close the connection
 ```
 
 # Unit Testing
-* Build Status: [![Build Status](https://travis-ci.org/JulianKahnert/RocketAPI.svg?branch=master)](https://travis-ci.org/JulianKahnert/RocketAPI)
+* Build Status: [![build status](https://gitlab.com/JulianKahnert/RocketAPI/badges/master/build.svg)](https://gitlab.com/JulianKahnert/RocketAPI/commits/master)
 * `python3 -m unittest unit_tests/*.py`
 
 # Acknowledgment
