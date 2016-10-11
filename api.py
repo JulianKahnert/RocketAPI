@@ -40,6 +40,9 @@ class api:
         except (ConnectionResetError, BrokenPipeError):
             critical(self.log,'connection broken (run {}): unable to continue, please create a new state object'.format(run_num + 1))
 
+        # catch strange write message from machine
+        if raw.decode('utf-8')[0] == 'w':
+            self.log.error('getting a "write" message from machine:')
         self.log.debug('<- {}'.format(raw))
 
         # verify message and checksum

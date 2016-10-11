@@ -414,17 +414,14 @@ if __name__ == "__main__":
 
     if args.on:
         log.info('Start the machine ...')
-        time.sleep(1)
         obj.isMachineInStandby = False
 
     if args.off:
         log.info('Shutting down the machine ...')
-        time.sleep(1)
         obj.isMachineInStandby = True
 
     if args.profile:
         log.info('Setting profile to "{}"'.format(args.profile))
-        time.sleep(1)
         obj.activeProfile = args.profile
 
     if args.read:
