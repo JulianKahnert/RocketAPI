@@ -6,79 +6,60 @@ import time
 
 
 class api:
-    def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
-        """
-        Contructor
-        """
-        # create logger
-        self.log = logging.getLogger('rocket.api')
-
-        # connection to Rocket
-        self.machine_ip = machine_ip
-        self.machine_port = machine_port
-        self.buffer_size = 128
-
-        # establishing the connection
-        self.s = socket.create_connection((self.machine_ip, self.machine_port), timeout=3)
-
-        # get first "hello" from machine
-        if self.s.recv(self.buffer_size) == b'*HELLO*':
-            self.log.info('connection established')
-        else:
-            self.log.critical('machine not reachable')
-            raise RuntimeError('machine not reachable')
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        self.s.close()
-
-    def read(self, idx):
+    def read(self, idx, run_num=0):
         """
         Read data
         """
         # generate message
         request = cs_attach('r' + format(idx, '04X') + format(1, '04X'))
         request = bytes(request, 'utf-8')
-        
-        # try to read data 3 times, if valid break
-        for k in range(3):
-            self.log.info('read byte #{} (run {})'.format(idx, k + 1))
-            if k != 0:
-                # not very nice, but more reliable:
-                time.sleep(0.1)
 
-            # send request
-            self.log.debug('-> {}'.format(request))
-            self.s.send(request)
+        self.log.info('read byte #{} (run {})'.format(idx, run_num + 1))
 
-            # recieve data
-            try:
-                raw = self.s.recv(self.buffer_size)
-            except socket.timeout:
-                self.log.error('socket timed out')
-                if k != 2:
-                    continue
-                else:
-                    raise RuntimeError('Socket timed out!')
+        # not very nice, but more reliable:
+        if not run_num == 0:
+            time.sleep(0.5)
 
-            self.log.debug('<- {}'.format(raw))
+        # send request
+        self.log.debug('-> {}'.format(request))
+        self.s.send(request)
 
-            # verify message and checksum
-            bLen = len(raw) == 13
-            bSame = request[:9] == raw[:9]
-            bChecksum = cs_verify(raw)
-            if bLen and bSame and bChecksum:
-                break
-            elif k == 2:
-                self.log.error('error with message - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
-                raise RuntimeError('Invalid message from machine!')
+        try:
+            # receive data
+            raw = self.s.recv(self.buffer_size)
+
+        except socket.timeout:
+            # try to read data 3 times, if valid break
+            if run_num < 3:
+                self.log.warning('run {}: socket timed out - retry to read ...'.format(run_num + 1))
+                self.read(idx, run_num + 1)
+                return
+            else:
+                critical(self.log, 'run {}: socket timed out several times => create a new state object'.format(run_num + 1))
+
+        except (ConnectionResetError, BrokenPipeError):
+            critical(self.log,'connection broken (run {}): unable to continue, please create a new state object'.format(run_num + 1))
+
+        # catch strange write message from machine
+        if raw.decode('utf-8')[0] == 'w':
+            self.log.error('getting a "write" message from machine: {}'.format(raw))
+        self.log.debug('<- {}'.format(raw))
+
+        # verify message and checksum
+        bLen = len(raw) == 13
+        bSame = request[:9] == raw[:9]
+        bChecksum = cs_verify(raw)
+        if not (bLen and bSame and bChecksum):
+            if run_num < 2:
+                self.log.warning('something (len: {}, same: {}, checksum: {}) went wrong, retry...'.format(bLen, bSame, bChecksum))
+                return self.read(idx, run_num + 1)
+            else:
+                critical(self.log, 'invalid message from machine - len: {}, same: {}, checksum: {}'.format(bLen, bSame, bChecksum))
 
         # cut request and checksum
         data = raw.split(request[:-2])[1][:-2]
         value = int(data, 16)
-        self.log.debug('recieved value: "{}"'.format(value))
+        self.log.debug('received value: "{}"'.format(value))
         return value
 
     def write(self, idx, value):
@@ -98,10 +79,47 @@ class api:
         self.s.send(request)
 
         # validation of write request
-        time.sleep(0.8)
+        time.sleep(1)
         machine_val = self.read(idx)
-        if machine_val != value:
+        if not machine_val == value:
             self.log.warning('write validation failed! machine: {} - wanted: {}'.format(machine_val, value))
+
+    def close(self):
+        """
+        Destructor
+        """
+        self.log.info('close connection to machine')
+        self.s.close()
+
+    def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
+        """
+        Constructor
+        """
+        # create logger
+        self.log = logging.getLogger('rocket.api')
+
+        # connection to Rocket
+        self.machine_ip = machine_ip
+        self.machine_port = machine_port
+        self.buffer_size = 128
+
+        # establishing the connection
+        self.s = socket.create_connection(
+            (self.machine_ip, self.machine_port), timeout=3)
+
+        # get first "hello" from machine
+        if self.s.recv(self.buffer_size) == b'*HELLO*':
+            self.log.info('connection established')
+        else:
+            critical(self.log, 'machine not reachable')
+
+
+def critical(log_obj, msg):
+    """
+    CHECKSUM
+    """
+    log_obj.critical(msg)
+    raise RuntimeError(msg)
 
 
 def checksum(raw):
@@ -110,7 +128,7 @@ def checksum(raw):
     """
     if isinstance(raw, bytes):
         raw = raw.decode('utf-8')
-    
+
     value = 0
     for sz in raw:
         value += ord(sz)
@@ -119,9 +137,11 @@ def checksum(raw):
         value_hex = '0' + value_hex
     return value_hex
 
+
 def cs_attach(message_tmp):
     message_tmp += checksum(message_tmp)
     return message_tmp
+
 
 def cs_verify(raw):
     if isinstance(raw, bytes):
