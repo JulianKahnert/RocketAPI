@@ -25,7 +25,7 @@ class api:
         self.s.send(request)
 
         try:
-            # recieve data
+            # receive data
             raw = self.s.recv(self.buffer_size)
 
         except socket.timeout:
@@ -42,7 +42,7 @@ class api:
 
         # catch strange write message from machine
         if raw.decode('utf-8')[0] == 'w':
-            self.log.error('getting a "write" message from machine:')
+            self.log.error('getting a "write" message from machine: {}'.format(raw))
         self.log.debug('<- {}'.format(raw))
 
         # verify message and checksum
@@ -59,7 +59,7 @@ class api:
         # cut request and checksum
         data = raw.split(request[:-2])[1][:-2]
         value = int(data, 16)
-        self.log.debug('recieved value: "{}"'.format(value))
+        self.log.debug('received value: "{}"'.format(value))
         return value
 
     def write(self, idx, value):
@@ -93,7 +93,7 @@ class api:
 
     def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
         """
-        Contructor
+        Constructor
         """
         # create logger
         self.log = logging.getLogger('rocket.api')

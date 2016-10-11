@@ -8,7 +8,7 @@ Have a lot of fun...
 
 # Requirements
 * repo: `git clone https://github.com/JulianKahnert/RocketAPI.git`
-* Python: `sudo pip3 install bottle` 
+* Python: `pip3 install bottle`
 * linux network interface `wlan0` must be conntected to "RocketEspresso" WLAN
 
 # Workflow
@@ -51,3 +51,6 @@ del obj
 
 # Acknowledgment
 Special thanks to [Jeffrey Stanton](https://github.com/jffry/) for [reverse engineering](https://github.com/jffry/rocket-r60v/blob/master/doc/Reverse%20Engineering.md) and documenting the [protocol](https://github.com/jffry/rocket-r60v/blob/master/doc/Protocol.md)!
+
+# Known Errors
+* sometimes getting write messages (`w004A0001OKA7`) from the R60V

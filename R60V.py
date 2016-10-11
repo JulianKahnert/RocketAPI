@@ -42,78 +42,78 @@ DefaultProfileB = np.array([[8, 4], [22, 9], [0, 0], [0, 0], [0, 0]])
 
 class state:
     # BYTE 0: temperature unit
-    TemperatureUnit = ['Celsius', 'Fahrenheit']
+    __TemperatureUnit = ['Celsius', 'Fahrenheit']
 
     def _set_temperatureUnit(self, x):
-        if x not in self.TemperatureUnit:
-            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.TemperatureUnit))
+        if x not in self.__TemperatureUnit:
+            self._log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.__TemperatureUnit))
         else:
-            self.api.write(0, self.TemperatureUnit.index(x))
+            self._api.write(0, self.__TemperatureUnit.index(x))
 
     temperatureUnit = property(
         fset=_set_temperatureUnit,
-        fget=lambda self: self.TemperatureUnit[self.api.read(0)],
+        fget=lambda self: self.__TemperatureUnit[self._api.read(0)],
         fdel=None,
         doc='Unit of temperature: Celsius/Fahrenheit')
 
     # BYTE 1: language
-    Language = ['English', 'German', 'French', 'Italian']
+    __Language = ['English', 'German', 'French', 'Italian']
 
     def _set_language(self, x):
-        if x not in self.Language:
-            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.Language))
+        if x not in self.__Language:
+            self._log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.__Language))
         else:
-            self.api.write(1, self.Language.index(x))
+            self._api.write(1, self.__Language.index(x))
 
     language = property(
         fset=_set_language,
-        fget=lambda self: self.Language[self.api.read(1)],
+        fget=lambda self: self.__Language[self._api.read(1)],
         fdel=None,
         doc='Selected language: English/German/French/Italian')
 
     # BYTE 2: coffee temperature
-    # coffee boiler in degree celsius
-    Coffee_temp_C = [85, 115]
-    # coffee boiler in degree fahrenheit
-    Coffee_temp_F = [185, 239]
+    # coffee boiler in degree Celsius
+    __Coffee_temp_C = [85, 115]
+    # coffee boiler in degree Fahrenheit
+    __Coffee_temp_F = [185, 239]
 
     def _set_coffeeTemperature(self, x):
         unit = self.temperatureUnit
         if unit == 'Celsius':
-            self._check_range(x, self.Coffee_temp_C, 'Temperature ')
+            self._check_range(x, self.__Coffee_temp_C, 'Temperature ')
         elif unit == 'Fahrenheit':
-            self._check_range(x, self.Coffee_temp_F, 'Temperature ')
+            self._check_range(x, self.__Coffee_temp_F, 'Temperature ')
         else:
-            self.log.error('Temperature unit has a wrong state "{}"'.format(unit))
+            self._log.error('Temperature unit has a wrong state "{}"'.format(unit))
             return
-        self.api.write(2, x)
+        self._api.write(2, x)
 
     coffeeTemperature = property(
         fset=_set_coffeeTemperature,
-        fget=lambda self: self.api.read(2),
+        fget=lambda self: self._api.read(2),
         fdel=None,
         doc='Temperature (in F or C) of coffee boiler: 85...115 °C')
 
     # BYTE 3: steam temperature
-    # steam boiler in degree celsius
-    Steam_temp_C = [115, 125]
-    # steam boiler in degree fahrenheit
-    Steam_temp_F = [239, 257]
+    # steam boiler in degree Celsius
+    __Steam_temp_C = [115, 125]
+    # steam boiler in degree Fahrenheit
+    __Steam_temp_F = [239, 257]
 
     def _set_steamTemperature(self, x):
         unit = self.temperatureUnit
         if unit == 'Celsius':
-            self._check_range(x, self.Steam_temp_C, 'Temperature ')
+            self._check_range(x, self.__Steam_temp_C, 'Temperature ')
         elif unit == 'Fahrenheit':
-            self._check_range(x, self.Steam_temp_F, 'Temperature ')
+            self._check_range(x, self.__Steam_temp_F, 'Temperature ')
         else:
-            self.log.error('Temperature unit has a wrong state "{}"'.format(unit))
+            self._log.error('Temperature unit has a wrong state "{}"'.format(unit))
             return
-        self.api.write(3, x)
+        self._api.write(3, x)
 
     steamTemperature = property(
         fset=_set_steamTemperature,
-        fget=lambda self: self.api.read(3),
+        fget=lambda self: self._api.read(3),
         fdel=None,
         doc='Temperature (in F or C) of steam boiler: 115...125 °C')
 
@@ -172,137 +172,137 @@ class state:
         doc='Pressure profile C - 5 times [seconds, bars]')
 
     # BYTE 70: water source
-    WaterSource = ['PlumbedIn', 'Tank']
+    __WaterSource = ['PlumbedIn', 'Tank']
 
     def _set_waterSource(self, x):
-        if x not in self.WaterSource:
-            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.WaterSource))
+        if x not in self.__WaterSource:
+            self._log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.__WaterSource))
         else:
-            self.api.write(70, self.WaterSource.index(x))
+            self._api.write(70, self.__WaterSource.index(x))
 
     waterSource = property(
         fset=_set_waterSource,
-        fget=lambda self: self.WaterSource[self.api.read(70)],
+        fget=lambda self: self.__WaterSource[self._api.read(70)],
         fdel=None,
         doc='Selected water source: "plumbed in" or "tank"')
 
     # BYTE 71: active profile
-    ActiveProfile = ['A', 'B', 'C']
+    __ActiveProfile = ['A', 'B', 'C']
 
     def _set_activeProfile(self, x):
-        if x not in self.ActiveProfile:
-            self.log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.ActiveProfile))
+        if x not in self.__ActiveProfile:
+            self._log.warning('"{}" is not valid. Choose one of: {}!'.format(x, self.__ActiveProfile))
         else:
-            self.api.write(71, self.ActiveProfile.index(x))
+            self._api.write(71, self.__ActiveProfile.index(x))
 
     activeProfile = property(
         fset=_set_activeProfile,
-        fget=lambda self: self.ActiveProfile[self.api.read(71)],
+        fget=lambda self: self.__ActiveProfile[self._api.read(71)],
         fdel=None,
         doc='Selected profile for next run.')
 
     # BYTE 72: steam clean time
     steamCleanTime = property(
         fset=None,
-        fget=lambda self: self.api.read(72),
+        fget=lambda self: self._api.read(72),
         fdel=None,
         doc='')
 
     # BYTE 73: is service boiler on
     def _set_isServiceBoilerOn(self, x):
         if not isinstance(x, bool):
-            self.log.warning('"{}" is not valid. Choose a bool!'.format(x))
+            self._log.warning('"{}" is not valid. Choose a boolean!'.format(x))
         else:
-            self.api.write(73, x)
+            self._api.write(73, x)
 
     isServiceBoilerOn = property(
         fset=_set_isServiceBoilerOn,
-        fget=lambda self: self.api.read(73) == 1,
+        fget=lambda self: self._api.read(73) == 1,
         fdel=None,
         doc='Status of steam (aka service) boiler: on/off')
 
     # BYTE 74: is machine in standby
     def _set_isMachineInStandby(self, x):
         if not isinstance(x, bool):
-            self.log.warning('"{}" is not valid. Choose a bool!'.format(x))
+            self._log.warning('"{}" is not valid. Choose a boolean!'.format(x))
         else:
-            self.api.write(74, x)
+            self._api.write(74, x)
 
     isMachineInStandby = property(
         fset=_set_isMachineInStandby,
-        fget=lambda self: self.api.read(74) == 1,
+        fget=lambda self: self._api.read(74) == 1,
         fdel=None,
         doc='Standby mode of R60V: on/off')
 
     # BYTE 75: NOT TESTED coffee cycles subtotal   # 75-76
     coffeeCyclesSubtotal = property(
         fset=None,
-        fget=lambda self: [self.api.read(75), self.api.read(76)],
+        fget=lambda self: [self._api.read(75), self._api.read(76)],
         fdel=None,
         doc='')
 
     # BYTE 77: NOT TESTED coffee cycles total      # 77-80
     coffeeCyclesTotal = property(
         fset=None,
-        fget=lambda self: [self.api.read(idx) for idx in range(77, 81)],
+        fget=lambda self: [self._api.read(idx) for idx in range(77, 81)],
         fdel=None,
         doc='')
 
     # BYTE 81: NOT TESTED auto on time     # 81-82
     autoOnTime = property(
         fset=None,
-        fget=lambda self: [self.api.read(81), self.api.read(82)],
+        fget=lambda self: [self._api.read(81), self._api.read(82)],
         fdel=None,
         doc='')
 
     # BYTE 83: NOT TESTED auto standby time    # 83-84
     autoStandbyTime = property(
         fset=None,
-        fget=lambda self: [self.api.read(83), self.api.read(84)],
+        fget=lambda self: [self._api.read(83), self._api.read(84)],
         fdel=None,
         doc='')
 
     # BYTE 85: NOT TESTED auto skip day
     autoSkipDay = property(
         fset=None,
-        fget=lambda self: self.api.read(85),
+        fget=lambda self: self._api.read(85),
         fdel=None,
         doc='')
 
     def __init__(self, machine_ip='192.168.1.1', machine_port=1774):
         # create logger
-        self.log = logging.getLogger('rocket.state')
+        self._log = logging.getLogger('rocket.state')
 
         # check if RocketEspresso SSID is available
         if re.search('RocketEspresso', os.popen('iwlist wlan0 scan').read()) is not None:
-            self.log.debug('SSID "RocketEspresso" found')
+            self._log.debug('SSID "RocketEspresso" found')
         else:
-            critical(self.log, 'SSID "RocketEspresso" not found')
+            critical(self._log, 'SSID "RocketEspresso" not found')
 
-        # ip adress from DHCP server of R60V?
+        # ip address from DHCP server of R60V?
         if os.popen('ifconfig | grep "192.168.1."').read():
-            self.log.debug('ip adress from DHCP server of R60V available')
+            self._log.debug('ip address from DHCP server of R60V available')
         else:
-            critical(self.log, 'no ip adress from DHCP server of R60V available')
+            critical(self._log, 'no ip address from DHCP server of R60V available')
 
         # create connection to machine
-        self.api = api(machine_ip=machine_ip, machine_port=machine_port)
+        self._api = api(machine_ip=machine_ip, machine_port=machine_port)
 
     def __del__(self):
-        self.log.info('run destructor')
-        self.api.close()
+        self._log.info('run destructor')
+        self._api.close()
 
     # ### helper functions ###
     def _check_range(self, selected, min_max, pre):
         if not(min_max[0] <= selected <= min_max[1]):
-            critical(self.log, '{}value "{}" is out of range [{} ... {}]!'.format(
+            critical(self._log, '{}value "{}" is out of range [{} ... {}]!'.format(
                 pre, selected, min_max[0], min_max[1]))
 
     def _check_profile(self, profile):
         # set default values
         err = []
         bValid = True
-        # (kind of) proteced MIN/MAX values
+        # (kind of) protected MIN/MAX values
         Pressure = [0, 14]  # bars
         Time = [0, 60]      # seconds
         # look at each of the 5 settings
@@ -314,28 +314,28 @@ class state:
 
     def _read_profile(self, offset):
         profile = np.array([
-            [self.api.read(offset + 0), self.api.read(offset + 10)],
-            [self.api.read(offset + 2), self.api.read(offset + 11)],
-            [self.api.read(offset + 4), self.api.read(offset + 12)],
-            [self.api.read(offset + 6), self.api.read(offset + 13)],
-            [self.api.read(offset + 8), self.api.read(offset + 14)]])
-        self.log.info('recieved profile (offset={}): {}'.format(offset, profile))
+            [self._api.read(offset + 0), self._api.read(offset + 10)],
+            [self._api.read(offset + 2), self._api.read(offset + 11)],
+            [self._api.read(offset + 4), self._api.read(offset + 12)],
+            [self._api.read(offset + 6), self._api.read(offset + 13)],
+            [self._api.read(offset + 8), self._api.read(offset + 14)]])
+        self._log.info('recieved profile (offset={}): {}'.format(offset, profile))
         profile = profile / 10  # deciseconds => seconds, decibar => bar
         return profile
 
     def _write_profile(self, offset, profile):
         p = np.array(profile) * 10
-        self.api.write(offset + 0, p[0][0]), self.api.write(offset + 10, p[0][1])
-        self.api.write(offset + 2, p[1][0]), self.api.write(offset + 11, p[1][1])
-        self.api.write(offset + 4, p[2][0]), self.api.write(offset + 12, p[2][1])
-        self.api.write(offset + 6, p[3][0]), self.api.write(offset + 13, p[3][1])
-        self.api.write(offset + 8, p[4][0]), self.api.write(offset + 14, p[4][1])
+        self._api.write(offset + 0, p[0][0]), self._api.write(offset + 10, p[0][1])
+        self._api.write(offset + 2, p[1][0]), self._api.write(offset + 11, p[1][1])
+        self._api.write(offset + 4, p[2][0]), self._api.write(offset + 12, p[2][1])
+        self._api.write(offset + 6, p[3][0]), self._api.write(offset + 13, p[3][1])
+        self._api.write(offset + 8, p[4][0]), self._api.write(offset + 14, p[4][1])
 
     def _read_PID(self, offset):
         profile = np.array([
-            self.api.read(offset + 0),
-            self.api.read(offset + 6),
-            self.api.read(offset + 12)])
+            self._api.read(offset + 0),
+            self._api.read(offset + 6),
+            self._api.read(offset + 12)])
         return profile
 
 if __name__ == "__main__":
@@ -351,7 +351,31 @@ if __name__ == "__main__":
     log.addHandler(sh)
 
     parser = argparse.ArgumentParser(
-        description='Commandline tool to read and write data from R60V.')
+        description='Command-line tool to read and write data from R60V.',
+        epilog="""\
+List of all R60V properties and their possible values ([] means: not writable):
+    * activeProfile             [A/B/C]
+    * autoOnTime                []
+    * autoSkipDay               []
+    * autoStandbyTime           []
+    * coffeeCyclesSubtotal      []
+    * coffeeCyclesTotal         []
+    * coffeePID                 []
+    * coffeeTemperature         C:[85...115] F:[185...239]
+    * groupPID                  []
+    * isMachineInStandby        [True/False]
+    * isServiceBoilerOn         [True/False]
+    * language                  [English/German/French/Italian]
+    * mysteryPID                []
+    * pressureA                 default: [[ 6, 4], [18, 9], [6, 5], [0, 0], [0, 0]]
+    * pressureB                 default: [[20, 9], [10, 5], [0, 0], [0, 0], [0, 0]]
+    * pressureC                 default: [[ 8, 4], [22, 9], [0, 0], [0, 0], [0, 0]]
+    * steamCleanTime            []
+    * steamTemperature          C:[115...125] F:[239...257]
+    * temperatureUnit           [Celsius/Fahrenheit]
+    * waterSource               [PlumbedIn/Tank]
+        """,
+        formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('-da', '--defaultA',
                         dest='defaultA',
@@ -425,7 +449,7 @@ if __name__ == "__main__":
         obj.activeProfile = args.profile
 
     if args.read:
-        log.info('recieved: {} = {}'.format(args.read, getattr(obj, args.read)))
+        log.info('received: {} = {}'.format(args.read, getattr(obj, args.read)))
 
     if args.setting:
         prop = args.setting[0]
